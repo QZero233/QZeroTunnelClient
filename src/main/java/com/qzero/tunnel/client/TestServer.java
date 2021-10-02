@@ -12,7 +12,7 @@ public class TestServer extends Thread{
     private ServerSocket serverSocket;
 
     public TestServer() throws Exception{
-        serverSocket=new ServerSocket(5566);
+        serverSocket=new ServerSocket(7777);
     }
 
     @Override

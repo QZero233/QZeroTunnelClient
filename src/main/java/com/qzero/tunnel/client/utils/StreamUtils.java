@@ -1,4 +1,4 @@
-package com.qzero.tunnel.client;
+package com.qzero.tunnel.client.utils;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -25,6 +25,13 @@ public class StreamUtils {
 
     public static void writeDataToOutputStream(OutputStream outputStream,byte[] data) throws IOException{
         outputStream.write(data);
+    }
+
+    public static String readFileIntoString(File file) throws Exception{
+        byte[] buf=readFile(file);
+        if(buf==null)
+            return null;
+        return new String(buf);
     }
 
     public static byte[] readFile(File file) throws IOException {
