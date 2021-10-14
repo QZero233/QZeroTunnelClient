@@ -42,7 +42,7 @@ public class TunnelConfig {
 
     @Override
     public String toString() {
-        return "TunnelConfig{" +
+        return "{" +
                 "tunnelPort=" + tunnelPort +
                 ", localIp='" + localIp + '\'' +
                 ", localPort=" + localPort +

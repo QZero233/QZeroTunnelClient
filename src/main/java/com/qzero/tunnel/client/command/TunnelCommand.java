@@ -6,6 +6,8 @@ import com.qzero.tunnel.client.service.TunnelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 public class TunnelCommand {
 
     private Logger log= LoggerFactory.getLogger(getClass());
@@ -142,6 +144,47 @@ public class TunnelCommand {
             return String.format("Tunnel on %d has been closed", tunnelPort);
         }catch (Exception e){
             log.error("Failed to close tunnel on "+tunnelPort,e);
+            return "Failed, reason: "+e.getMessage();
+        }
+    }
+
+    /**
+     * get_tunnel_config tunnelPort
+     * @param parts
+     * @param commandLine
+     * @return
+     */
+    @CommandMethod(commandName = "get_tunnel_config",parameterCount = 1)
+    private String getTunnelConfig(String[] parts,String commandLine){
+        int tunnelPort;
+        try {
+            tunnelPort=Integer.parseInt(parts[1]);
+        }catch (NumberFormatException e){
+            throw new IllegalPortException(parts[1]);
+        }
+
+        try {
+            TunnelConfig config=TunnelService.getTunnelConfig(tunnelPort);
+            return config.toString();
+        }catch (Exception e){
+            log.error("Failed to get tunnel config on "+tunnelPort,e);
+            return "Failed, reason: "+e.getMessage();
+        }
+    }
+
+    /**
+     * get_all_tunnel_config
+     * @param parts
+     * @param commandLine
+     * @return
+     */
+    @CommandMethod(commandName = "get_all_tunnel_config",parameterCount = 0)
+    private String getAllTunnelConfig(String[] parts,String commandLine){
+        try {
+            List<TunnelConfig> configList=TunnelService.getAllTunnelConfig();
+            return configList.toString();
+        }catch (Exception e){
+            log.error("Failed to get all tunnel config ",e);
             return "Failed, reason: "+e.getMessage();
         }
     }
