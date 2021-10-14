@@ -1,0 +1,21 @@
+[INFO]    10:50:56:361|com.qzero.tunnel.client.remind.RemindThread|Connected to serverside's remind server 
+[INFO]    10:53:39:331|com.qzero.tunnel.client.remind.RemindThread|Connected to serverside's remind server 
+[INFO]    10:54:46:956|com.qzero.tunnel.client.remind.RemindThread|Connected to serverside's remind server 
+[INFO]    10:57:09:082|com.qzero.tunnel.client.remind.RemindThread|Connected to serverside's remind server 
+[TRACE]    10:57:26:683|com.qzero.tunnel.client.relay.RelaySession|Relay route from 127.0.0.1 to 127.0.0.1 has started 
+[INFO]    16:33:34:920|com.qzero.tunnel.client.remind.RemindThread|Connected to serverside's remind server 
+[INFO]    16:38:31:405|com.qzero.tunnel.client.remind.RemindThread|Connected to serverside's remind server 
+[INFO]    16:42:38:940|com.qzero.tunnel.client.remind.RemindThread|Connected to serverside's remind server 
+[INFO]    16:43:34:688|com.qzero.tunnel.client.remind.RemindThread|Connected to serverside's remind server 
+[INFO]    16:45:13:015|com.qzero.tunnel.client.remind.RemindThread|Connected to serverside's remind server 
+[TRACE]    17:28:58:960|com.qzero.tunnel.client.ClientMain|Found server local : ServerProfile{serverIp='127.0.0.1', entrancePort=8080, portInfo=ServerPortInfo{remindServerPort=0, relaySeverPort=0}} 
+[TRACE]    17:29:42:965|com.qzero.tunnel.client.ClientMain|Found server local : ServerProfile{serverIp='127.0.0.1', entrancePort=8080, portInfo=ServerPortInfo{remindServerPort=0, relaySeverPort=0}} 
+[TRACE]    17:30:01:271|com.qzero.tunnel.client.ClientMain|Found server local : ServerProfile{serverIp='127.0.0.1', entrancePort=8080, portInfo=ServerPortInfo{remindServerPort=0, relaySeverPort=0}} 
+[TRACE]    17:30:31:397|com.qzero.tunnel.client.ClientMain|Found server local : ServerProfile{serverIp='127.0.0.1', entrancePort=8080, portInfo=ServerPortInfo{remindServerPort=0, relaySeverPort=0}} 
+[TRACE]    17:30:56:582|com.qzero.tunnel.client.ClientMain|Found server local : ServerProfile{serverIp='127.0.0.1', entrancePort=8080, portInfo=ServerPortInfo{remindServerPort=9997, relaySeverPort=9995}} 
+[TRACE]    17:31:32:398|com.qzero.tunnel.client.ClientMain|Found server local : ServerProfile{serverIp='127.0.0.1', entrancePort=8080, portInfo=ServerPortInfo{remindServerPort=9997, relaySeverPort=9995}} 
+[INFO]    17:31:39:020|com.qzero.tunnel.client.remind.RemindThread|Connected to serverside's remind server 
+[TRACE]    17:33:46:422|com.qzero.tunnel.client.ClientMain|Found server local : ServerProfile{serverIp='127.0.0.1', entrancePort=8080, portInfo=ServerPortInfo{remindServerPort=9997, relaySeverPort=9995}} 
+[INFO]    17:33:56:101|com.qzero.tunnel.client.remind.RemindThread|Connected to serverside's remind server 
+[TRACE]    17:34:31:942|com.qzero.tunnel.client.ClientMain|Found server local : ServerProfile{serverIp='127.0.0.1', entrancePort=8080, portInfo=ServerPortInfo{remindServerPort=9997, relaySeverPort=9995}} 
+[INFO]    17:34:35:610|com.qzero.tunnel.client.remind.RemindThread|Connected to serverside's remind server 

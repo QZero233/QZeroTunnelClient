@@ -9,6 +9,7 @@ import com.qzero.tunnel.client.remind.RemindThread;
 import com.qzero.tunnel.client.service.AuthorizeService;
 import com.qzero.tunnel.client.utils.HttpUtils;
 import com.qzero.tunnel.client.utils.NormalHttpUtils;
+import com.qzero.tunnel.client.utils.SHA256Utils;
 import com.qzero.tunnel.client.utils.StreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -180,7 +181,8 @@ public class ClientMain {
 
         while (true){
             System.out.println("1) Login now for token");
-            System.out.println("2) Choose token from existing token storage");
+            System.out.println("2) Register a new account");
+            System.out.println("3) Choose token from existing token storage");
             System.out.println("-1) Exit");
             System.out.print("Please input your choice:");
 
@@ -195,6 +197,9 @@ public class ClientMain {
                     token=loginForToken();
                     break;
                 case "2":
+                    token=register();
+                    break;
+                case "3":
                     token=chooseTokenFromStorage();
                     break;
             }
@@ -206,11 +211,37 @@ public class ClientMain {
         }
     }
 
+    private static UserToken register(){
+        System.out.print("Please input your username:");
+        String username=scanner.next();
+        System.out.print("Please input your password:");
+        String password=scanner.next();
+
+        String passwordHash= SHA256Utils.getHexEncodedSHA256(password);
+
+        boolean isSucceeded=false;
+        try {
+            isSucceeded=AuthorizeService.register(username,passwordHash);
+        }catch (Exception e){
+            log.error("Failed to register",e);
+        }
+
+        if(isSucceeded){
+            System.out.println("Register successfully, please login");
+        }else{
+            System.out.println("Register failed");
+        }
+
+        return null;
+    }
+
     private static UserToken loginForToken(){
         System.out.print("Please input your username:");
         String username=scanner.next();
-        System.out.print("Please input your password hash:");
-        String passwordHash=scanner.next();
+        System.out.print("Please input your password:");
+        String password=scanner.next();
+
+        String passwordHash= SHA256Utils.getHexEncodedSHA256(password);
 
         String token= null;
         try {

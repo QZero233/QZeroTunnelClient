@@ -25,4 +25,16 @@ public class AuthorizeService {
             return null;
     }
 
+    public static boolean register(String username,String passwordHash) throws Exception {
+        HttpRequestParam param=new HttpRequestParam();
+        param.add("username",username);
+        param.add("password_hash",passwordHash);
+
+        HttpUtils httpUtils= HttpUtils.getInstance();
+        String result=httpUtils.doPost("/auth/register",param);
+
+        ActionResult actionResult=JSONObject.parseObject(result,ActionResult.class);
+        return actionResult.isSucceeded();
+    }
+
 }
