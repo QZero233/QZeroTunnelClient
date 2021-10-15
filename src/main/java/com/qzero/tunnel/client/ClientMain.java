@@ -7,6 +7,7 @@ import com.qzero.tunnel.client.config.ServerProfile;
 import com.qzero.tunnel.client.data.UserToken;
 import com.qzero.tunnel.client.remind.RemindThread;
 import com.qzero.tunnel.client.service.AuthorizeService;
+import com.qzero.tunnel.client.service.LocalTokenStorageService;
 import com.qzero.tunnel.client.utils.HttpUtils;
 import com.qzero.tunnel.client.utils.NormalHttpUtils;
 import com.qzero.tunnel.client.utils.SHA256Utils;
@@ -42,6 +43,8 @@ public class ClientMain {
 
         String baseUrl="http://"+serverProfile.getServerIp()+":"+serverProfile.getEntrancePort();
         HttpUtils.getInstance().setBaseUrl(baseUrl);
+
+        LocalTokenStorageService.initialize(new File(SERVERS_PATH+serverProfile.getServerName(),TOKEN_STORAGE_FILE_NAME));
 
         UserToken token=chooseToken();
         System.out.println("Token chosen");
@@ -176,7 +179,6 @@ public class ClientMain {
         }
     }
 
-
     private static UserToken chooseToken(){
 
         while (true){
@@ -265,52 +267,65 @@ public class ClientMain {
     }
 
     private static UserToken chooseTokenFromStorage(){
-        String storageString;
+        LocalTokenStorageService storageService=LocalTokenStorageService.getInstance();
+
+        List<UserToken> tokenList;
         try {
-            File file=new File(SERVERS_PATH+serverProfile.getServerName(),TOKEN_STORAGE_FILE_NAME);
-            byte[] buf= StreamUtils.readFile(file);
-            storageString=new String(buf);
-            if(storageString==null || storageString.equals(""))
-                throw new Exception();
-        }catch (Exception e){
+            tokenList=storageService.getAllToken();
+        } catch (Exception e) {
+            log.error("Failed to load all token",e);
+            System.out.println("Failed to load all token, please check log for detailed message");
+            return null;
+        }
+
+        if(tokenList==null || tokenList.isEmpty()){
             System.out.println("Token storage is empty");
             return null;
         }
 
-        String[] lines=storageString.split("\n");
-        List<UserToken> tokenList=new ArrayList<>();
         int i=0;
-        for(String line:lines){
-            String[] parts=line.split(",");
-            if(parts.length!=2)
-                continue;
-            String token=parts[0];
-            String username=parts[1];
-            System.out.println(String.format("%d)%s %s", i,username,token));
-
-            tokenList.add(new UserToken(token,username));
+        for(UserToken token:tokenList){
+            System.out.println(String.format("%d)%s %s", i,token.getUsername(),token.getToken()));
             i++;
         }
 
+
         System.out.print("Please input your choice:");
         int choice=scanner.nextInt();
-        if(choice>lines.length-1 || choice<0){
+        if(choice> tokenList.size()-1 || choice<0){
             System.out.println("Illegal input");
             return null;
         }
 
-        return tokenList.get(choice);
+        UserToken token=tokenList.get(choice);
+
+        try {
+            if(!AuthorizeService.checkTokenValidity(token.getToken(),token.getUsername())){
+                System.out.println("Token is invalid, please select another");
+
+                try {
+                    tokenList.remove(choice);
+                    storageService.saveTokenList(tokenList);
+                }catch (Exception e){
+                    log.error("Failed to remove invalid token from storage",e);
+                }
+
+                return null;
+            }
+        }catch (Exception e){
+            log.error("Failed to check token validity",e);
+            System.out.println("Warning: failed to check token validity, this token may be invalid");
+        }
+
+        return token;
     }
 
-    private static void addTokenIntoStorage(String token,String username) throws IOException {
-        File file=new File(SERVERS_PATH+serverProfile.getServerName(),TOKEN_STORAGE_FILE_NAME);
-        if(!file.exists())
-            file.createNewFile();
+    private static void addTokenIntoStorage(String token,String username) throws Exception {
+        LocalTokenStorageService storageService=LocalTokenStorageService.getInstance();
 
-        byte[] buf=StreamUtils.readFile(file);
-        String content=new String(buf);
-        content+="\n"+token+","+username;
-        StreamUtils.writeFile(file,content.getBytes(StandardCharsets.UTF_8));
+        List<UserToken> tokenList=storageService.getAllToken();
+        tokenList.add(new UserToken(token,username));
+        storageService.saveTokenList(tokenList);
     }
 
 }
