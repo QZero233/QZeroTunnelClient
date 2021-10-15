@@ -33,6 +33,7 @@ public class CommandExecutor {
 
     public void loadCommands() throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
         loadCommandsFor(TunnelCommand.class);
+        loadCommandsFor(TokenCommand.class);
     }
 
     private void loadCommandsFor(Class cls) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {

@@ -39,7 +39,7 @@ public class AuthorizeService {
 
     public static boolean checkTokenValidity(String token,String username) throws Exception {
         HttpUtils httpUtils= HttpUtils.getInstance();
-        String result=httpUtils.doGet(String.format("/%s/validity?username=%s", token, username));
+        String result=httpUtils.doGet(String.format("/auth/%s/validity?username=%s", token, username));
 
         ActionResult actionResult=JSONObject.parseObject(result,ActionResult.class);
         return actionResult.isSucceeded();
