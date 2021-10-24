@@ -1,5 +1,7 @@
 package com.qzero.tunnel.client.remind;
 
+import com.qzero.tunnel.client.crypto.CryptoModule;
+import com.qzero.tunnel.client.crypto.CryptoModuleContainer;
 import com.qzero.tunnel.client.relay.RelaySession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +66,7 @@ public class RemindThread extends Thread {
 
                 try {
                     String[] parts=line.split(" ");
-                    RelaySession session=prepareRelay(parts[0],parts[1],parts[2],Integer.parseInt(parts[3]));
+                    RelaySession session=prepareRelay(parts[0],parts[1],parts[2],Integer.parseInt(parts[3]),parts[4]);
                     session.startRelay();
                 }catch (Exception e1){
                     log.error("Failed to start relay session with line "+line,e1);
@@ -80,7 +82,12 @@ public class RemindThread extends Thread {
         }
     }
 
-    private RelaySession prepareRelay(String tunnelPort,String sessionId,String localIp,int localPort) throws Exception{
+    private RelaySession prepareRelay(String tunnelPort,String sessionId,String localIp,int localPort,String cryptoModuleName) throws Exception{
+        CryptoModule module=CryptoModuleContainer.getInstance().getModule(cryptoModuleName);
+        if(module==null){
+            throw new Exception(String.format("Crypto module named %s does not exist", cryptoModuleName));
+        }
+
         Socket remote=new Socket(ip,relayServerPort);
         remote.getOutputStream().write((tunnelPort+" "+sessionId+"\n").getBytes());
 
@@ -93,6 +100,7 @@ public class RemindThread extends Thread {
         }
 
         RelaySession session=new RelaySession();
+        session.initializeCryptoModule(module);
         session.setTunnelClient(remote);
         session.setDirectClient(local);
         return session;

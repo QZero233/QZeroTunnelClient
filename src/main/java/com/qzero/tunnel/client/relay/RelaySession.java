@@ -1,5 +1,7 @@
 package com.qzero.tunnel.client.relay;
 
+import com.qzero.tunnel.client.crypto.CryptoContext;
+import com.qzero.tunnel.client.crypto.CryptoModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,12 +17,20 @@ public class RelaySession {
     private RelayThread directToTunnel;
     private RelayThread tunnelToDirect;
 
+    private CryptoContext context;
+    private CryptoModule cryptoModule;
+
     public void setDirectClient(Socket directClient) {
         this.directClient = directClient;
     }
 
     public void setTunnelClient(Socket tunnelClient) {
         this.tunnelClient = tunnelClient;
+    }
+
+    public void initializeCryptoModule(CryptoModule cryptoModule){
+        this.cryptoModule=cryptoModule;
+        context=cryptoModule.getInitialContext();
     }
 
     public void startRelay(){
@@ -44,10 +54,35 @@ public class RelaySession {
             }catch (Exception e){
                 log.trace("Failed to close tunnel client connection",e);
             }
+
         };
 
-        directToTunnel=new RelayThread(directClient,tunnelClient,synchronizedDisconnectListener);
-        tunnelToDirect=new RelayThread(tunnelClient,directClient,synchronizedDisconnectListener);
+
+        directToTunnel=new RelayThread(directClient, tunnelClient, synchronizedDisconnectListener, new DataPreprocessor() {
+            @Override
+            public byte[] beforeSent(byte[] data) {
+                return cryptoModule.encrypt(data,context);
+            }
+
+            @Override
+            public byte[] afterReceived(byte[] data) {
+                return data;
+            }
+        });
+
+        //Tunnel to relay server: encrypted
+        //Relay server to direct: unencrypted
+        tunnelToDirect=new RelayThread(tunnelClient, directClient, synchronizedDisconnectListener, new DataPreprocessor() {
+            @Override
+            public byte[] beforeSent(byte[] data) {
+                return data;
+            }
+
+            @Override
+            public byte[] afterReceived(byte[] data) {
+                return cryptoModule.decrypt(data,context);
+            }
+        });
 
         directToTunnel.start();
         tunnelToDirect.start();
@@ -71,6 +106,7 @@ public class RelaySession {
             log.trace("Failed to stop relay session",e);
         }
         log.trace("Relay session has stopped");
+
     }
 
 }
