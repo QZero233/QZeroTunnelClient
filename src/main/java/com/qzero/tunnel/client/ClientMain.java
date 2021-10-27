@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.qzero.tunnel.client.command.CommandExecutor;
 import com.qzero.tunnel.client.config.ServerPortInfo;
 import com.qzero.tunnel.client.config.ServerProfile;
-import com.qzero.tunnel.client.crypto.CryptoModuleContainer;
 import com.qzero.tunnel.client.data.UserToken;
 import com.qzero.tunnel.client.remind.RemindThread;
 import com.qzero.tunnel.client.service.AuthorizeService;
@@ -17,8 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -40,17 +37,7 @@ public class ClientMain {
     private static ServerProfile serverProfile;
 
     public static void main(String[] args) throws Exception{
-        //new TestServer().start();
-
-        System.out.println("Loading crypto modules");
-        try {
-            CryptoModuleContainer.getInstance().loadDefaultModules();
-        }catch (Exception e){
-            log.error("Failed to load crypto modules",e);
-            System.out.println("Failed to load crypto modules");
-            System.exit(0);
-        }
-
+        new TestServer().start();
 
         serverProfile=chooseServer();
 

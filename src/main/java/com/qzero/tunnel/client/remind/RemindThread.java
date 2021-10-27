@@ -1,7 +1,8 @@
 package com.qzero.tunnel.client.remind;
 
 import com.qzero.tunnel.client.crypto.CryptoModule;
-import com.qzero.tunnel.client.crypto.CryptoModuleContainer;
+import com.qzero.tunnel.client.crypto.CryptoModuleFactory;
+import com.qzero.tunnel.client.crypto.modules.PlainModule;
 import com.qzero.tunnel.client.relay.RelaySession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +84,7 @@ public class RemindThread extends Thread {
     }
 
     private RelaySession prepareRelay(String tunnelPort,String sessionId,String localIp,int localPort,String cryptoModuleName) throws Exception{
-        CryptoModule module=CryptoModuleContainer.getInstance().getModule(cryptoModuleName);
+        CryptoModule module= CryptoModuleFactory.getModule(cryptoModuleName);
         if(module==null){
             throw new Exception(String.format("Crypto module named %s does not exist", cryptoModuleName));
         }
@@ -100,9 +101,19 @@ public class RemindThread extends Thread {
         }
 
         RelaySession session=new RelaySession();
-        session.initializeCryptoModule(module);
         session.setTunnelClient(remote);
         session.setDirectClient(local);
+
+        try {
+            module.doHandshakeAsClient(remote.getInputStream(),remote.getOutputStream());
+        }catch (Exception e){
+            log.error("Failed to do handshake, session closed",e);
+            session.closeSession();
+        }
+
+        //FIXME watch out! crypto policy may not be as simple as you think
+        session.initializeCryptoModule(module,new PlainModule());
+
         return session;
     }
 
