@@ -111,7 +111,6 @@ public class RemindThread extends Thread {
             session.closeSession();
         }
 
-        //FIXME watch out! crypto policy may not be as simple as you think
         session.initializeCryptoModule(module,new PlainModule());
 
         return session;
