@@ -2,6 +2,7 @@ package com.qzero.tunnel.client;
 
 import com.alibaba.fastjson.JSONObject;
 import com.qzero.tunnel.client.command.CommandExecutor;
+import com.qzero.tunnel.client.config.ServerConfigContainer;
 import com.qzero.tunnel.client.config.ServerPortInfo;
 import com.qzero.tunnel.client.config.ServerProfile;
 import com.qzero.tunnel.client.data.UserToken;
@@ -40,6 +41,7 @@ public class ClientMain {
         new TestServer().start();
 
         serverProfile=chooseServer();
+        ServerConfigContainer.getInstance().setCurrentServerProfile(serverProfile);
 
         String baseUrl="http://"+serverProfile.getServerIp()+":"+serverProfile.getEntrancePort();
         HttpUtils.getInstance().setBaseUrl(baseUrl);
@@ -47,6 +49,8 @@ public class ClientMain {
         LocalTokenStorageService.initialize(new File(SERVERS_PATH+serverProfile.getServerName(),TOKEN_STORAGE_FILE_NAME));
 
         UserToken token=chooseToken();
+        ServerConfigContainer.getInstance().setUserToken(token);
+
         System.out.println("Token chosen");
         HttpUtils.getInstance().setAuthInfo(token);
 

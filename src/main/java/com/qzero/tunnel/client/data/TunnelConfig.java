@@ -4,16 +4,19 @@ package com.qzero.tunnel.client.data;
 public class TunnelConfig {
 
     private int tunnelPort;
-    private String localIp;
-    private int localPort;
+    private String cryptoModuleName;
+    private int tunnelType;
+
+    public static final int TYPE_NAT_TRAVERSE=1;
+    public static final int TYPE_PROXY=2;
 
     public TunnelConfig() {
     }
 
-    public TunnelConfig(int tunnelPort, String localIp, int localPort) {
+    public TunnelConfig(int tunnelPort, String cryptoModuleName, int tunnelType) {
         this.tunnelPort = tunnelPort;
-        this.localIp = localIp;
-        this.localPort = localPort;
+        this.cryptoModuleName = cryptoModuleName;
+        this.tunnelType = tunnelType;
     }
 
     public int getTunnelPort() {
@@ -24,28 +27,28 @@ public class TunnelConfig {
         this.tunnelPort = tunnelPort;
     }
 
-    public String getLocalIp() {
-        return localIp;
+    public String getCryptoModuleName() {
+        return cryptoModuleName;
     }
 
-    public void setLocalIp(String localIp) {
-        this.localIp = localIp;
+    public void setCryptoModuleName(String cryptoModuleName) {
+        this.cryptoModuleName = cryptoModuleName;
     }
 
-    public int getLocalPort() {
-        return localPort;
+    public int getTunnelType() {
+        return tunnelType;
     }
 
-    public void setLocalPort(int localPort) {
-        this.localPort = localPort;
+    public void setTunnelType(int tunnelType) {
+        this.tunnelType = tunnelType;
     }
 
     @Override
     public String toString() {
-        return "{" +
+        return "TunnelConfig{" +
                 "tunnelPort=" + tunnelPort +
-                ", localIp='" + localIp + '\'' +
-                ", localPort=" + localPort +
+                ", cryptoModuleName='" + cryptoModuleName + '\'' +
+                ", tunnelType=" + tunnelType +
                 '}';
     }
 }

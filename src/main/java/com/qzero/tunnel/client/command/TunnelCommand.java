@@ -12,8 +12,19 @@ public class TunnelCommand {
 
     private Logger log= LoggerFactory.getLogger(getClass());
 
+    private int convertTunnelType(String tunnelTypeInString) {
+        switch (tunnelTypeInString.toLowerCase()){
+            case "nattraverse":
+                return TunnelConfig.TYPE_NAT_TRAVERSE;
+            case "proxy":
+                return TunnelConfig.TYPE_PROXY;
+            default:
+                throw new IllegalArgumentException("No tunnel type "+tunnelTypeInString);
+        }
+    }
+
     /**
-     * new_tunnel tunnelPort localIp localPort
+     * new_tunnel tunnelPort cryptoModuleName tunnelTypeInString
      * @param parts
      * @param commandLine
      * @return
@@ -27,14 +38,9 @@ public class TunnelCommand {
             throw new IllegalPortException(parts[1]);
         }
 
-        int localPort;
-        try {
-            localPort=Integer.parseInt(parts[3]);
-        }catch (NumberFormatException e){
-            throw new IllegalPortException(parts[3]);
-        }
+        int tunnelType = convertTunnelType(parts[3]);
 
-        TunnelConfig tunnelConfig=new TunnelConfig(tunnelPort,parts[2],localPort);
+        TunnelConfig tunnelConfig=new TunnelConfig(tunnelPort,parts[2],tunnelType);
         try {
             TunnelService.newTunnel(tunnelConfig);
             return "New tunnel has been created";
@@ -45,13 +51,13 @@ public class TunnelCommand {
     }
 
     /**
-     * update_tunnel tunnelPort localIp localPort
+     * update_tunnel_crypto tunnelPort cryptoModuleName isHot
      * @param parts
      * @param commandLine
      * @return
      */
-    @CommandMethod(commandName = "update_tunnel",parameterCount = 3)
-    private String updateTunnel(String[] parts,String commandLine){
+    @CommandMethod(commandName = "update_tunnel_crypto",parameterCount = 3)
+    private String updateTunnelCrypto(String[] parts,String commandLine){
         int tunnelPort;
         try {
             tunnelPort=Integer.parseInt(parts[1]);
@@ -59,16 +65,12 @@ public class TunnelCommand {
             throw new IllegalPortException(parts[1]);
         }
 
-        int localPort;
-        try {
-            localPort=Integer.parseInt(parts[3]);
-        }catch (NumberFormatException e){
-            throw new IllegalPortException(parts[3]);
-        }
 
-        TunnelConfig tunnelConfig=new TunnelConfig(tunnelPort,parts[2],localPort);
+        TunnelConfig tunnelConfig=new TunnelConfig(tunnelPort,parts[2],0);
+        boolean isHot=Boolean.getBoolean(parts[3]);
+
         try {
-            TunnelService.updateTunnel(tunnelConfig);
+            TunnelService.updateCryptoModuleName(tunnelConfig,isHot);
             return String.format("Tunnel config on %d has been updated", tunnelPort);
         }catch (Exception e){
             log.error("Failed to update tunnel config for "+tunnelConfig,e);

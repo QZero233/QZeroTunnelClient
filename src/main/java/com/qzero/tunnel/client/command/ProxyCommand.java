@@ -1,0 +1,33 @@
+package com.qzero.tunnel.client.command;
+
+import com.qzero.tunnel.client.exception.IllegalPortException;
+import com.qzero.tunnel.client.proxy.ProxyBridgeThread;
+
+public class ProxyCommand {
+
+    /**
+     * start_proxy_bridge localPort tunnelPort
+     * @param parts
+     * @param commandLine
+     */
+    @CommandMethod(commandName = "start_proxy_bridge",parameterCount = 2)
+    private String startProxyBridge(String[] parts,String commandLine){
+        int localPort;
+        try {
+            localPort=Integer.parseInt(parts[1]);
+        }catch (NumberFormatException e){
+            throw new IllegalPortException(parts[1]);
+        }
+
+        int tunnelPort;
+        try {
+            tunnelPort=Integer.parseInt(parts[2]);
+        }catch (NumberFormatException e){
+            throw new IllegalPortException(parts[2]);
+        }
+
+        new ProxyBridgeThread(localPort,tunnelPort).start();
+        return "Started successfully";
+    }
+
+}

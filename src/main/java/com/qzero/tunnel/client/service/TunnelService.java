@@ -14,8 +14,8 @@ public class TunnelService {
         HttpUtils httpUtils= HttpUtils.getInstance();
 
         HttpRequestParam param=new HttpRequestParam();
-        param.add("local_ip",tunnelConfig.getLocalIp());
-        param.add("local_port",tunnelConfig.getLocalPort()+"");
+        param.add("crypto_module_name",tunnelConfig.getCryptoModuleName());
+        param.add("tunnel_type",tunnelConfig.getTunnelType()+"");
 
         String result=httpUtils.doPost("/tunnel/"+tunnelConfig.getTunnelPort(),param);
         ActionResult actionResult= JSONObject.parseObject(result,ActionResult.class);
@@ -24,14 +24,17 @@ public class TunnelService {
             throw new Exception(actionResult.getMessage());
     }
 
-    public static void updateTunnel(TunnelConfig tunnelConfig) throws Exception {
+    public static void updateCryptoModuleName(TunnelConfig tunnelConfig,boolean hot) throws Exception {
         HttpUtils httpUtils= HttpUtils.getInstance();
 
         HttpRequestParam param=new HttpRequestParam();
-        param.add("local_ip",tunnelConfig.getLocalIp());
-        param.add("local_port",tunnelConfig.getLocalPort()+"");
+        param.add("crypto_module_name",tunnelConfig.getCryptoModuleName());
 
-        String result=httpUtils.doPut("/tunnel/"+tunnelConfig.getTunnelPort(),param);
+        String path="/tunnel/"+tunnelConfig.getTunnelPort()+"/crypto_module_name";
+        if(hot)
+            path+="/hot";
+
+        String result=httpUtils.doPut(path,param);
         ActionResult actionResult= JSONObject.parseObject(result,ActionResult.class);
 
         if(!actionResult.isSucceeded())
