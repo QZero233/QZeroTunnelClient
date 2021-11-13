@@ -151,6 +151,9 @@ public class ProxyBridgeThread extends Thread {
         }catch (Exception e){
             log.error("Failed to start local socks5 server",e);
         }
+    }
 
+    public void closeBridge() throws Exception{
+        socks5Server.stopServer();
     }
 }

@@ -11,6 +11,10 @@ public class ActionFailedException extends Exception{
         this.reason = reason;
     }
 
+    public ActionFailedException(String reason){
+        this("Unknown action",reason);
+    }
+
     public String getActionMethodName() {
         return actionMethodName;
     }
