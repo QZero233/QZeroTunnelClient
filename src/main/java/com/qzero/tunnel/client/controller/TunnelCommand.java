@@ -6,6 +6,7 @@ import com.qzero.tunnel.client.exception.IllegalPortException;
 import com.qzero.tunnel.client.service.TunnelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
@@ -14,6 +15,9 @@ import java.util.List;
 public class TunnelCommand {
 
     private Logger log= LoggerFactory.getLogger(getClass());
+
+    @Autowired
+    private TunnelService tunnelService;
 
     private int convertTunnelType(String tunnelTypeInString) {
         switch (tunnelTypeInString.toLowerCase()){
@@ -33,7 +37,7 @@ public class TunnelCommand {
      * @return
      */
     @CommandMethod(commandName = "new_tunnel",parameterCount = 3)
-    private String newTunnel(String[] parts,String commandLine){
+    private String newTunnel(String[] parts,String commandLine) throws Exception {
         int tunnelPort;
         try {
             tunnelPort=Integer.parseInt(parts[1]);
@@ -44,13 +48,9 @@ public class TunnelCommand {
         int tunnelType = convertTunnelType(parts[3]);
 
         TunnelConfig tunnelConfig=new TunnelConfig(tunnelPort,parts[2],tunnelType);
-        try {
-            TunnelService.newTunnel(tunnelConfig);
-            return "New tunnel has been created";
-        }catch (Exception e){
-            log.error("Failed to new tunnel port for "+tunnelConfig,e);
-            return "Failed, reason: "+e.getMessage();
-        }
+
+        tunnelService.newTunnel(tunnelConfig);
+        return "New tunnel has been created";
     }
 
     /**
@@ -60,7 +60,7 @@ public class TunnelCommand {
      * @return
      */
     @CommandMethod(commandName = "update_tunnel_crypto",parameterCount = 3)
-    private String updateTunnelCrypto(String[] parts,String commandLine){
+    private String updateTunnelCrypto(String[] parts,String commandLine) throws Exception {
         int tunnelPort;
         try {
             tunnelPort=Integer.parseInt(parts[1]);
@@ -72,13 +72,9 @@ public class TunnelCommand {
         TunnelConfig tunnelConfig=new TunnelConfig(tunnelPort,parts[2],0);
         boolean isHot=Boolean.getBoolean(parts[3]);
 
-        try {
-            TunnelService.updateCryptoModuleName(tunnelConfig,isHot);
-            return String.format("Tunnel config on %d has been updated", tunnelPort);
-        }catch (Exception e){
-            log.error("Failed to update tunnel config for "+tunnelConfig,e);
-            return "Failed, reason: "+e.getMessage();
-        }
+
+        tunnelService.updateCryptoModuleName(tunnelConfig,isHot);
+        return String.format("Tunnel config on %d has been updated", tunnelPort);
     }
 
     /**
@@ -88,7 +84,7 @@ public class TunnelCommand {
      * @return
      */
     @CommandMethod(commandName = "delete_tunnel",parameterCount = 1)
-    private String deleteTunnel(String[] parts,String commandLine){
+    private String deleteTunnel(String[] parts,String commandLine) throws Exception{
         int tunnelPort;
         try {
             tunnelPort=Integer.parseInt(parts[1]);
@@ -96,13 +92,8 @@ public class TunnelCommand {
             throw new IllegalPortException(parts[1]);
         }
 
-        try {
-            TunnelService.deleteTunnel(tunnelPort);
-            return String.format("Tunnel on %d has been deleted", tunnelPort);
-        }catch (Exception e){
-            log.error("Failed to delete tunnel on "+tunnelPort,e);
-            return "Failed, reason: "+e.getMessage();
-        }
+        tunnelService.deleteTunnel(tunnelPort);
+        return String.format("Tunnel on %d has been deleted", tunnelPort);
     }
 
     /**
@@ -112,7 +103,7 @@ public class TunnelCommand {
      * @return
      */
     @CommandMethod(commandName = "open_tunnel",parameterCount = 1)
-    private String openTunnel(String[] parts,String commandLine){
+    private String openTunnel(String[] parts,String commandLine) throws Exception {
         int tunnelPort;
         try {
             tunnelPort=Integer.parseInt(parts[1]);
@@ -120,13 +111,9 @@ public class TunnelCommand {
             throw new IllegalPortException(parts[1]);
         }
 
-        try {
-            TunnelService.openTunnel(tunnelPort);
-            return String.format("Tunnel on %d has opened", tunnelPort);
-        }catch (Exception e){
-            log.error("Failed to open tunnel on "+tunnelPort,e);
-            return "Failed, reason: "+e.getMessage();
-        }
+
+        tunnelService.openTunnel(tunnelPort);
+        return String.format("Tunnel on %d has opened", tunnelPort);
     }
 
     /**
@@ -136,7 +123,7 @@ public class TunnelCommand {
      * @return
      */
     @CommandMethod(commandName = "close_tunnel",parameterCount = 1)
-    private String closeTunnel(String[] parts,String commandLine){
+    private String closeTunnel(String[] parts,String commandLine) throws Exception {
         int tunnelPort;
         try {
             tunnelPort=Integer.parseInt(parts[1]);
@@ -144,13 +131,9 @@ public class TunnelCommand {
             throw new IllegalPortException(parts[1]);
         }
 
-        try {
-            TunnelService.closeTunnel(tunnelPort);
-            return String.format("Tunnel on %d has been closed", tunnelPort);
-        }catch (Exception e){
-            log.error("Failed to close tunnel on "+tunnelPort,e);
-            return "Failed, reason: "+e.getMessage();
-        }
+
+        tunnelService.closeTunnel(tunnelPort);
+        return String.format("Tunnel on %d has been closed", tunnelPort);
     }
 
     /**
@@ -160,7 +143,7 @@ public class TunnelCommand {
      * @return
      */
     @CommandMethod(commandName = "get_tunnel_config",parameterCount = 1)
-    private String getTunnelConfig(String[] parts,String commandLine){
+    private String getTunnelConfig(String[] parts,String commandLine) throws Exception {
         int tunnelPort;
         try {
             tunnelPort=Integer.parseInt(parts[1]);
@@ -168,13 +151,9 @@ public class TunnelCommand {
             throw new IllegalPortException(parts[1]);
         }
 
-        try {
-            TunnelConfig config=TunnelService.getTunnelConfig(tunnelPort);
-            return config.toString();
-        }catch (Exception e){
-            log.error("Failed to get tunnel config on "+tunnelPort,e);
-            return "Failed, reason: "+e.getMessage();
-        }
+
+        TunnelConfig config=tunnelService.getTunnelConfig(tunnelPort);
+        return config.toString();
     }
 
     /**
@@ -183,15 +162,10 @@ public class TunnelCommand {
      * @param commandLine
      * @return
      */
-    @CommandMethod(commandName = "get_all_tunnel_config",parameterCount = 0)
-    private String getAllTunnelConfig(String[] parts,String commandLine){
-        try {
-            List<TunnelConfig> configList=TunnelService.getAllTunnelConfig();
-            return configList.toString();
-        }catch (Exception e){
-            log.error("Failed to get all tunnel config ",e);
-            return "Failed, reason: "+e.getMessage();
-        }
+    @CommandMethod(commandName = "get_all_tunnel_config")
+    private String getAllTunnelConfig(String[] parts,String commandLine) throws Exception {
+        List<TunnelConfig> configList=tunnelService.getAllTunnelConfig();
+        return configList.toString();
     }
 
 }

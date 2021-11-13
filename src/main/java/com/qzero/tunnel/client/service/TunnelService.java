@@ -3,6 +3,7 @@ package com.qzero.tunnel.client.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.qzero.tunnel.client.data.TunnelConfig;
+import com.qzero.tunnel.client.service.aspect.UseExceptionAdvice;
 import com.qzero.tunnel.client.utils.HttpRequestParam;
 import com.qzero.tunnel.client.utils.HttpUtils;
 import org.springframework.stereotype.Service;
@@ -12,21 +13,19 @@ import java.util.List;
 @Service
 public class TunnelService {
 
-    public static void newTunnel(TunnelConfig tunnelConfig) throws Exception {
+    @UseExceptionAdvice
+    public String newTunnel(TunnelConfig tunnelConfig) throws Exception {
         HttpUtils httpUtils= HttpUtils.getInstance();
 
         HttpRequestParam param=new HttpRequestParam();
         param.add("crypto_module_name",tunnelConfig.getCryptoModuleName());
         param.add("tunnel_type",tunnelConfig.getTunnelType()+"");
 
-        String result=httpUtils.doPost("/tunnel/"+tunnelConfig.getTunnelPort(),param);
-        ActionResult actionResult= JSONObject.parseObject(result,ActionResult.class);
-
-        if(!actionResult.isSucceeded())
-            throw new Exception(actionResult.getMessage());
+        return httpUtils.doPost("/tunnel/"+tunnelConfig.getTunnelPort(),param);
     }
 
-    public static void updateCryptoModuleName(TunnelConfig tunnelConfig,boolean hot) throws Exception {
+    @UseExceptionAdvice
+    public String updateCryptoModuleName(TunnelConfig tunnelConfig,boolean hot) throws Exception {
         HttpUtils httpUtils= HttpUtils.getInstance();
 
         HttpRequestParam param=new HttpRequestParam();
@@ -36,47 +35,31 @@ public class TunnelService {
         if(hot)
             path+="/hot";
 
-        String result=httpUtils.doPut(path,param);
-        ActionResult actionResult= JSONObject.parseObject(result,ActionResult.class);
-
-        if(!actionResult.isSucceeded())
-            throw new Exception(actionResult.getMessage());
+        return httpUtils.doPut(path,param);
     }
 
-    public static void deleteTunnel(int tunnelPort) throws Exception {
+    @UseExceptionAdvice
+    public String deleteTunnel(int tunnelPort) throws Exception {
         HttpUtils httpUtils= HttpUtils.getInstance();
 
-        String result=httpUtils.doDelete("/tunnel/"+tunnelPort);
-        ActionResult actionResult= JSONObject.parseObject(result,ActionResult.class);
-
-        if(!actionResult.isSucceeded()){
-            throw new Exception(actionResult.getMessage());
-        }
+        return httpUtils.doDelete("/tunnel/"+tunnelPort);
     }
 
-    public static void openTunnel(int tunnelPort) throws Exception {
+    @UseExceptionAdvice
+    public String openTunnel(int tunnelPort) throws Exception {
         HttpUtils httpUtils= HttpUtils.getInstance();
 
-        String result=httpUtils.doGet(String.format("/tunnel/%d/open", tunnelPort));
-        ActionResult actionResult= JSONObject.parseObject(result,ActionResult.class);
-
-        if(!actionResult.isSucceeded()){
-            throw new Exception(actionResult.getMessage());
-        }
+        return httpUtils.doGet(String.format("/tunnel/%d/open", tunnelPort));
     }
 
-    public static void closeTunnel(int tunnelPort) throws Exception {
+    @UseExceptionAdvice
+    public String closeTunnel(int tunnelPort) throws Exception {
         HttpUtils httpUtils= HttpUtils.getInstance();
 
-        String result=httpUtils.doGet(String.format("/tunnel/%d/close", tunnelPort));
-        ActionResult actionResult= JSONObject.parseObject(result,ActionResult.class);
-
-        if(!actionResult.isSucceeded()){
-            throw new Exception(actionResult.getMessage());
-        }
+        return httpUtils.doGet(String.format("/tunnel/%d/close", tunnelPort));
     }
 
-    public static TunnelConfig getTunnelConfig(int tunnelPort) throws Exception{
+    public TunnelConfig getTunnelConfig(int tunnelPort) throws Exception{
         HttpUtils httpUtils= HttpUtils.getInstance();
 
         String result=httpUtils.doGet("/tunnel/"+tunnelPort);
@@ -91,7 +74,7 @@ public class TunnelService {
         return config;
     }
 
-    public static List<TunnelConfig> getAllTunnelConfig() throws Exception{
+    public List<TunnelConfig> getAllTunnelConfig() throws Exception{
         HttpUtils httpUtils= HttpUtils.getInstance();
 
         String result=httpUtils.doGet("/tunnel/");

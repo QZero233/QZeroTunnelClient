@@ -20,7 +20,7 @@ public class NATTraverseCommand {
      * @return
      */
     @CommandMethod(commandName = "new_nat_traverse_mapping",parameterCount = 3)
-    private String newNATTraverseMapping(String[] parts,String commandLine){
+    private String newNATTraverseMapping(String[] parts,String commandLine) throws Exception {
         int tunnelPort;
         try {
             tunnelPort=Integer.parseInt(parts[1]);
@@ -36,13 +36,8 @@ public class NATTraverseCommand {
         }
 
         NATTraverseMapping natTraverseMapping=new NATTraverseMapping(tunnelPort,parts[2],localPort);
-        try {
-            NATTraverseMappingService.newNATTraverseMapping(natTraverseMapping);
-            return "New NATTraverseMapping has been created";
-        }catch (Exception e){
-            log.error("Failed to new NATTraverseMapping for "+natTraverseMapping,e);
-            return "Failed, reason: "+e.getMessage();
-        }
+        NATTraverseMappingService.newNATTraverseMapping(natTraverseMapping);
+        return "New NATTraverseMapping has been created";
     }
 
     /**
@@ -52,7 +47,7 @@ public class NATTraverseCommand {
      * @return
      */
     @CommandMethod(commandName = "update_nat_traverse_mapping",parameterCount = 4)
-    private String updateNATTraverseMapping(String[] parts,String commandLine){
+    private String updateNATTraverseMapping(String[] parts,String commandLine) throws Exception {
         int tunnelPort;
         try {
             tunnelPort=Integer.parseInt(parts[1]);
@@ -70,13 +65,9 @@ public class NATTraverseCommand {
         NATTraverseMapping natTraverseMapping=new NATTraverseMapping(tunnelPort,parts[2],localPort);
         boolean isHot=Boolean.getBoolean(parts[4]);
 
-        try {
-            NATTraverseMappingService.updateNATTraverseMapping(natTraverseMapping,isHot);
-            return String.format("NATTraverseMapping on %d has been updated", tunnelPort);
-        }catch (Exception e){
-            log.error("Failed to update NATTraverseMapping for "+natTraverseMapping,e);
-            return "Failed, reason: "+e.getMessage();
-        }
+
+        NATTraverseMappingService.updateNATTraverseMapping(natTraverseMapping,isHot);
+        return String.format("NATTraverseMapping on %d has been updated", tunnelPort);
     }
 
     /**
@@ -86,7 +77,7 @@ public class NATTraverseCommand {
      * @return
      */
     @CommandMethod(commandName = "delete_nat_traverse_mapping",parameterCount = 1)
-    private String deleteNATTraverseMapping(String[] parts,String commandLine){
+    private String deleteNATTraverseMapping(String[] parts,String commandLine) throws Exception {
         int tunnelPort;
         try {
             tunnelPort=Integer.parseInt(parts[1]);
@@ -94,13 +85,9 @@ public class NATTraverseCommand {
             throw new IllegalPortException(parts[1]);
         }
 
-        try {
-            NATTraverseMappingService.deleteNATTraverseMapping(tunnelPort);
-            return String.format("NAT traverse mapping on %d has been deleted", tunnelPort);
-        }catch (Exception e){
-            log.error("Failed to delete NAT traverse mapping on "+tunnelPort,e);
-            return "Failed, reason: "+e.getMessage();
-        }
+
+        NATTraverseMappingService.deleteNATTraverseMapping(tunnelPort);
+        return String.format("NAT traverse mapping on %d has been deleted", tunnelPort);
     }
 
     /**
@@ -110,7 +97,7 @@ public class NATTraverseCommand {
      * @return
      */
     @CommandMethod(commandName = "get_nat_traverse_mapping",parameterCount = 1)
-    private String getNATTraverseMapping(String[] parts,String commandLine){
+    private String getNATTraverseMapping(String[] parts,String commandLine) throws Exception {
         int tunnelPort;
         try {
             tunnelPort=Integer.parseInt(parts[1]);
@@ -118,13 +105,9 @@ public class NATTraverseCommand {
             throw new IllegalPortException(parts[1]);
         }
 
-        try {
-            NATTraverseMapping natTraverseMapping=NATTraverseMappingService.getNATTraverseMapping(tunnelPort);
-            return natTraverseMapping.toString();
-        }catch (Exception e){
-            log.error("Failed to get NAT traverse mapping on "+tunnelPort,e);
-            return "Failed, reason: "+e.getMessage();
-        }
+
+        NATTraverseMapping natTraverseMapping=NATTraverseMappingService.getNATTraverseMapping(tunnelPort);
+        return natTraverseMapping.toString();
     }
 
 }

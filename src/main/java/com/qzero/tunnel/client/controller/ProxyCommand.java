@@ -14,7 +14,7 @@ public class ProxyCommand {
      * @param commandLine
      */
     @CommandMethod(commandName = "start_proxy_bridge",parameterCount = 2)
-    private String startProxyBridge(String[] parts,String commandLine){
+    private String startProxyBridge(String[] parts,String commandLine) throws IllegalPortException {
         int localPort;
         try {
             localPort=Integer.parseInt(parts[1]);

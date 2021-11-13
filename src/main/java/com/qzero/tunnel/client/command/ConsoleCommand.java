@@ -10,6 +10,6 @@ public interface ConsoleCommand {
      * @param fullCommand
      * @return
      */
-    String execute(String[] commandParts, String fullCommand);
+    String execute(String[] commandParts, String fullCommand) throws Exception;
 
 }

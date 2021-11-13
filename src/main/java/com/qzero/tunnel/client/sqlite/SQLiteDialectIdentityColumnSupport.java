@@ -1,4 +1,4 @@
-package com.qzero.tunnel.client.config;
+package com.qzero.tunnel.client.sqlite;
 
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.identity.IdentityColumnSupportImpl;

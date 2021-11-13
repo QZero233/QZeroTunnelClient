@@ -3,6 +3,7 @@ package com.qzero.tunnel.client.service;
 import com.alibaba.fastjson.JSONObject;
 import com.qzero.tunnel.client.data.UserToken;
 import com.qzero.tunnel.client.data.repository.UserTokenRepository;
+import com.qzero.tunnel.client.service.aspect.UseExceptionAdvice;
 import com.qzero.tunnel.client.utils.HttpRequestParam;
 import com.qzero.tunnel.client.utils.HttpUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,26 +39,23 @@ public class AuthorizeService {
             return null;
     }
 
-    public boolean register(String username,String passwordHash) throws Exception {
+    @UseExceptionAdvice
+    public String register(String username,String passwordHash) throws Exception {
         HttpRequestParam param=new HttpRequestParam();
         param.add("username",username);
         param.add("password_hash",passwordHash);
 
         HttpUtils httpUtils= HttpUtils.getInstance();
-        String result=httpUtils.doPost("/auth/register",param);
-
-        ActionResult actionResult=JSONObject.parseObject(result,ActionResult.class);
-        return actionResult.isSucceeded();
+        return httpUtils.doPost("/auth/register",param);
     }
 
     public boolean checkTokenValidity(String token,String username) throws Exception {
         HttpUtils httpUtils= HttpUtils.getInstance();
-        String result=httpUtils.doGet(String.format("/auth/%s/validity?username=%s", token, username));
+        String result= httpUtils.doGet(String.format("/auth/%s/validity?username=%s", token, username));
 
         ActionResult actionResult=JSONObject.parseObject(result,ActionResult.class);
         return actionResult.isSucceeded();
     }
-
 
 
     public List<UserToken> getAllToken(){

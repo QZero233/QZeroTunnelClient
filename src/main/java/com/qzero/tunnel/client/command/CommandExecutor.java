@@ -1,6 +1,7 @@
 package com.qzero.tunnel.client.command;
 
 import com.qzero.tunnel.client.SpringUtil;
+import com.qzero.tunnel.client.exception.ActionFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ public class CommandExecutor {
 
     private Map<String, ConsoleCommand> commandMap=new HashMap<>();
 
-    public CommandExecutor() {
+    public CommandExecutor() throws Exception {
         //Get all controller and load command functions within them
         ApplicationContext applicationContext= SpringUtil.getApplicationContextStatic();
         Map<String,Object> beans=applicationContext.getBeansWithAnnotation(Controller.class);
@@ -44,11 +46,12 @@ public class CommandExecutor {
      * Get all command functions from an object and load them
      * @param instance The object
      */
-    private void loadCommands(Object instance)  {
+    private void loadCommands(Object instance) {
         Class cls=instance.getClass();
+
         Method[] methods=cls.getDeclaredMethods();
         for(Method method:methods){
-            CommandMethod commandMethodAnnotation=method.getAnnotation(CommandMethod.class);
+            CommandMethod commandMethodAnnotation=method.getDeclaredAnnotation(CommandMethod.class);
             if(commandMethodAnnotation==null)
                 continue;
 
@@ -81,14 +84,9 @@ public class CommandExecutor {
                 }
 
                 @Override
-                public String execute(String[] commandParts, String fullCommand) {
-                    try {
-                        method.setAccessible(true);
-                        return (String) method.invoke(instance,commandParts,fullCommand);
-                    } catch (Exception e){
-                        log.error(String.format("Failed to invoke command method %s for command %s", method.getName(),commandName),e);
-                        return "Failed to execute command, please contact admin to see logs for detail";
-                    }
+                public String execute(String[] commandParts, String fullCommand) throws InvocationTargetException, IllegalAccessException {
+                    method.setAccessible(true);
+                    return (String) method.invoke(instance,commandParts,fullCommand);
                 }
             });
         }
@@ -162,8 +160,36 @@ public class CommandExecutor {
             return String.format("Command %s need as least %d parameters, but there are only %d", commandName,
                     parameterCount,parts.length-1);
 
-        //Do not do exception handling here, since it has already been done in consoleCommand
-        return consoleCommand.execute(parts,commandLine);
+
+        //Process action failed and invoke method failed
+        //Illegal parameter will be processed in controller
+        try {
+            return consoleCommand.execute(parts,commandLine);
+        }catch (InvocationTargetException invocationTargetException){
+            //Caused by method it called
+
+            Throwable target=invocationTargetException.getTargetException();
+            if(target instanceof ActionFailedException){
+                //Action failed
+                ActionFailedException actionFailedException= (ActionFailedException) target;
+                log.error("Failed to execute command method "+actionFailedException.getActionMethodName(),actionFailedException);
+                return "Failed, reason: "+actionFailedException.getReason();
+            }else{
+                //Unknown exception
+                log.error(String.format("Failed to execute command %s for unknown reason", commandName),target);
+                return "Unknown error, please see log for detail";
+            }
+
+        }catch (IllegalAccessException e){
+            //Failed to invoke method
+            log.error(String.format("Failed to invoke command method for command %s",commandName),e);
+            return "Failed to invoke command method, please see logs for detail";
+        }catch (Exception e){
+            //Other unknown exception
+            log.error(String.format("Failed to execute command %s for unknown reason", commandName),e);
+            return "Unknown error, please see log for detail";
+        }
+
     }
 
 }

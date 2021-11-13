@@ -201,17 +201,12 @@ public class ClientMain {
 
         String passwordHash= SHA256Utils.getHexEncodedSHA256(password);
 
-        boolean isSucceeded=false;
         try {
             AuthorizeService authorizeService=SpringUtil.getBean(AuthorizeService.class);
-            isSucceeded=authorizeService.register(username,passwordHash);
+            authorizeService.register(username,passwordHash);
+            System.out.println("Register successfully, please login");
         }catch (Exception e){
             log.error("Failed to register",e);
-        }
-
-        if(isSucceeded){
-            System.out.println("Register successfully, please login");
-        }else{
             System.out.println("Register failed");
         }
 

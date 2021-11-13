@@ -1,4 +1,4 @@
-package com.qzero.tunnel.client.config;
+package com.qzero.tunnel.client.sqlite;
 
 import org.hibernate.JDBCException;
 import org.hibernate.ScrollMode;
