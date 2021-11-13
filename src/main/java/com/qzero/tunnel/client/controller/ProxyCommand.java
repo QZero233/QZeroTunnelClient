@@ -1,8 +1,11 @@
-package com.qzero.tunnel.client.command;
+package com.qzero.tunnel.client.controller;
 
+import com.qzero.tunnel.client.command.CommandMethod;
 import com.qzero.tunnel.client.exception.IllegalPortException;
 import com.qzero.tunnel.client.proxy.ProxyBridgeThread;
+import org.springframework.stereotype.Controller;
 
+@Controller
 public class ProxyCommand {
 
     /**

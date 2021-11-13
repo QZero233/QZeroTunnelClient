@@ -1,11 +1,14 @@
-package com.qzero.tunnel.client.command;
+package com.qzero.tunnel.client.controller;
 
+import com.qzero.tunnel.client.command.CommandMethod;
 import com.qzero.tunnel.client.data.NATTraverseMapping;
 import com.qzero.tunnel.client.exception.IllegalPortException;
 import com.qzero.tunnel.client.service.NATTraverseMappingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
 
+@Controller
 public class NATTraverseCommand {
 
     private Logger log= LoggerFactory.getLogger(getClass());

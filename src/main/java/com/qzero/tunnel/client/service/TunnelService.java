@@ -5,9 +5,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.qzero.tunnel.client.data.TunnelConfig;
 import com.qzero.tunnel.client.utils.HttpRequestParam;
 import com.qzero.tunnel.client.utils.HttpUtils;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class TunnelService {
 
     public static void newTunnel(TunnelConfig tunnelConfig) throws Exception {

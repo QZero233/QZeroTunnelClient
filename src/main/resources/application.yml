@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    driver-class-name: "org.sqlite.JDBC"
+    url: "jdbc:sqlite:example.db"
+    type: org.sqlite.SQLiteDataSource
+  jpa:
+    database-platform: com.qzero.tunnel.client.config.SQLiteDialect
+    hibernate:
+      ddl-auto: update

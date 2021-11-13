@@ -1,20 +1,36 @@
-package com.qzero.tunnel.client.config;
+package com.qzero.tunnel.client.data;
 
+import javax.persistence.*;
+
+@Entity
 public class ServerProfile {
 
-    private String serverName;
+    @Id
+    private String id;
     private String serverIp;
+    private String serverName;
     private int entrancePort;
+
+    @Transient
     private ServerPortInfo portInfo;
 
     public ServerProfile() {
     }
 
-    public ServerProfile(String serverName, String serverIp, int entrancePort, ServerPortInfo portInfo) {
-        this.serverName = serverName;
+    public ServerProfile(String id, String serverIp, String serverName, int entrancePort, ServerPortInfo portInfo) {
+        this.id = id;
         this.serverIp = serverIp;
+        this.serverName = serverName;
         this.entrancePort = entrancePort;
         this.portInfo = portInfo;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getServerName() {

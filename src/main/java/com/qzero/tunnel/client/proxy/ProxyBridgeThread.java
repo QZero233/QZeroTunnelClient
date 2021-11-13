@@ -1,6 +1,7 @@
 package com.qzero.tunnel.client.proxy;
 
-import com.qzero.tunnel.client.config.ServerConfigContainer;
+import com.qzero.tunnel.client.GlobalConfigStorage;
+import com.qzero.tunnel.client.SpringUtil;
 import com.qzero.tunnel.client.crypto.CryptoModule;
 import com.qzero.tunnel.client.crypto.CryptoModuleFactory;
 import com.qzero.tunnel.client.crypto.modules.PlainModule;
@@ -30,7 +31,8 @@ public class ProxyBridgeThread extends Thread {
 
         Socket remote;
         try {
-            String ip= ServerConfigContainer.getInstance().getCurrentServerProfile().getServerIp();
+            GlobalConfigStorage configStorage= SpringUtil.getBean(GlobalConfigStorage.class);
+            String ip= configStorage.getCurrentServerProfile().getServerIp();
             remote=new Socket(ip,remotePort);
         }catch (Exception e){
             log.error("Failed to connect to tunnel server");
@@ -91,7 +93,9 @@ public class ProxyBridgeThread extends Thread {
             4 bytes port
             */
             ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
-            String token=ServerConfigContainer.getInstance().getUserToken().getToken();
+
+            GlobalConfigStorage configStorage= SpringUtil.getBean(GlobalConfigStorage.class);
+            String token=configStorage.getUserToken().getToken();
 
             StreamUtils.writeIntWith4Bytes(byteArrayOutputStream,token.getBytes(StandardCharsets.UTF_8).length);
             byteArrayOutputStream.write(token.getBytes(StandardCharsets.UTF_8));

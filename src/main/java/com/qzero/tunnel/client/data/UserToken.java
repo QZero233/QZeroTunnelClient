@@ -1,7 +1,12 @@
 package com.qzero.tunnel.client.data;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
 public class UserToken {
 
+    @Id
     private String token;
     private String username;
 

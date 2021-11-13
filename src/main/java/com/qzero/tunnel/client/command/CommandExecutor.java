@@ -1,10 +1,13 @@
 package com.qzero.tunnel.client.command;
 
+import com.qzero.tunnel.client.SpringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import java.io.ByteArrayOutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -12,34 +15,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class CommandExecutor {
 
     private Logger log= LoggerFactory.getLogger(getClass());
 
     private Map<String, ConsoleCommand> commandMap=new HashMap<>();
 
-    private static CommandExecutor instance;
+    public CommandExecutor() {
+        //Get all controller and load command functions within them
+        ApplicationContext applicationContext= SpringUtil.getApplicationContextStatic();
+        Map<String,Object> beans=applicationContext.getBeansWithAnnotation(Controller.class);
 
-    public static CommandExecutor getInstance(){
-        if(instance==null)
-            instance=new CommandExecutor();
-        return instance;
+        for(Map.Entry<String,Object> entry:beans.entrySet()){
+            Object obj=entry.getValue();
+            if(obj==null)
+                continue;
 
+            try {
+                loadCommands(obj);
+            }catch (Exception e){
+                log.error("Failed to load commands for class "+obj.getClass().getName());
+            }
+        }
     }
 
-    private CommandExecutor(){
-
-    }
-
-    public void loadCommands() throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
-        loadCommandsFor(TunnelCommand.class);
-        loadCommandsFor(NATTraverseCommand.class);
-        loadCommandsFor(ProxyCommand.class);
-        loadCommandsFor(TokenCommand.class);
-    }
-
-    private void loadCommandsFor(Class cls) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-        Object instance=cls.getDeclaredConstructor().newInstance();
+    /**
+     * Get all command functions from an object and load them
+     * @param instance The object
+     */
+    private void loadCommands(Object instance)  {
+        Class cls=instance.getClass();
         Method[] methods=cls.getDeclaredMethods();
         for(Method method:methods){
             CommandMethod commandMethodAnnotation=method.getAnnotation(CommandMethod.class);
@@ -74,7 +80,6 @@ public class CommandExecutor {
                     return commandMethodAnnotation.parameterCount();
                 }
 
-
                 @Override
                 public String execute(String[] commandParts, String fullCommand) {
                     try {
@@ -89,16 +94,12 @@ public class CommandExecutor {
         }
     }
 
-    public void addCommand(String commandName,ConsoleCommand consoleCommand){
-        if(commandMap.containsKey(commandName))
-            throw new IllegalArgumentException("Already have a command named "+commandName);
-
-        if(consoleCommand==null)
-            throw new NullPointerException("Can not take an empty command implement");
-
-        commandMap.put(commandName,consoleCommand);
-    }
-
+    /**
+     * Split a full command line into parts
+     * The part with quotation marks will be regarded as a whole part
+     * @param commandLine The full command line
+     * @return The split parts
+     */
     private String[] splitCommand(String commandLine){
         byte[] buf=commandLine.getBytes();
         List<String> commandParts=new ArrayList<>();
@@ -143,6 +144,11 @@ public class CommandExecutor {
         return commandParts.toArray(new String[]{});
     }
 
+    /**
+     * Execute a command line and get the result
+     * @param commandLine The command line
+     * @return The result
+     */
     public String executeCommand(String commandLine){
         String[] parts=splitCommand(commandLine);
         String commandName=parts[0];
@@ -156,11 +162,8 @@ public class CommandExecutor {
             return String.format("Command %s need as least %d parameters, but there are only %d", commandName,
                     parameterCount,parts.length-1);
 
+        //Do not do exception handling here, since it has already been done in consoleCommand
         return consoleCommand.execute(parts,commandLine);
-    }
-
-    public void unloadCommand(String commandName){
-        commandMap.remove(commandName);
     }
 
 }

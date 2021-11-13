@@ -1,59 +1,56 @@
 package com.qzero.tunnel.client;
 
-import com.alibaba.fastjson.JSONObject;
 import com.qzero.tunnel.client.command.CommandExecutor;
-import com.qzero.tunnel.client.config.ServerConfigContainer;
-import com.qzero.tunnel.client.config.ServerPortInfo;
-import com.qzero.tunnel.client.config.ServerProfile;
+import com.qzero.tunnel.client.data.ServerPortInfo;
+import com.qzero.tunnel.client.data.ServerProfile;
 import com.qzero.tunnel.client.data.UserToken;
 import com.qzero.tunnel.client.remind.RemindThread;
 import com.qzero.tunnel.client.service.AuthorizeService;
-import com.qzero.tunnel.client.service.LocalTokenStorageService;
+import com.qzero.tunnel.client.service.ServerProfileService;
 import com.qzero.tunnel.client.utils.HttpUtils;
-import com.qzero.tunnel.client.utils.NormalHttpUtils;
 import com.qzero.tunnel.client.utils.SHA256Utils;
-import com.qzero.tunnel.client.utils.StreamUtils;
+import com.qzero.tunnel.client.utils.UUIDUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+@SpringBootApplication
 public class ClientMain {
 
     private static Logger log= LoggerFactory.getLogger(ClientMain.class);
 
     private static Scanner scanner=new Scanner(System.in);
 
-    public static final String TOKEN_STORAGE_FILE_NAME="token.storage";
-    public static final String SERVER_CONFIG_FILE_NAME="serverConfig.config";
-    public static final String SERVERS_PATH="servers/";
-
-    static {
-        new File(SERVERS_PATH).mkdirs();
-    }
-
     private static ServerProfile serverProfile;
 
     public static void main(String[] args) throws Exception{
+        SpringApplication.run(ClientMain.class);
+
         new TestServer().start();
 
-        serverProfile=chooseServer();
-        ServerConfigContainer.getInstance().setCurrentServerProfile(serverProfile);
+        GlobalConfigStorage configStorage=SpringUtil.getBean(GlobalConfigStorage.class);
 
+        //Choose server profile
+        serverProfile=chooseServer();
+        configStorage.setCurrentServerProfile(serverProfile);
+
+        //Set base url
         String baseUrl="http://"+serverProfile.getServerIp()+":"+serverProfile.getEntrancePort();
         HttpUtils.getInstance().setBaseUrl(baseUrl);
 
-        LocalTokenStorageService.initialize(new File(SERVERS_PATH+serverProfile.getServerName(),TOKEN_STORAGE_FILE_NAME));
-
+        //Choose user token
         UserToken token=chooseToken();
-        ServerConfigContainer.getInstance().setUserToken(token);
-
+        configStorage.setUserToken(token);
         System.out.println("Token chosen");
+
+        //Set auth info
         HttpUtils.getInstance().setAuthInfo(token);
 
+        //Connect to remind server
         try {
             ServerPortInfo portInfo= serverProfile.getPortInfo();;
             RemindThread remindThread=new RemindThread(serverProfile.getServerIp(),portInfo.getRemindServerPort()
@@ -65,10 +62,10 @@ public class ClientMain {
             return;
         }
 
+        //Initialize command executor
+        CommandExecutor executor=SpringUtil.getBean(CommandExecutor.class);
 
-        CommandExecutor executor=CommandExecutor.getInstance();
-        executor.loadCommands();
-
+        //Start command line
         while (true){
             System.out.print("Command>");
             String line=scanner.nextLine();
@@ -91,98 +88,73 @@ public class ClientMain {
 
     }
 
+    /**
+     * Output a menu to let user choose server
+     * @return
+     */
     private static ServerProfile chooseServer(){
-        File[] files=new File(SERVERS_PATH).listFiles();
+        ServerProfileService service=SpringUtil.getBean(ServerProfileService.class);
+        List<ServerProfile> profileList=service.getAllAvailableServerProfile();
 
-        List<ServerProfile> profileList=new ArrayList<>();
-
-        if(files==null || files.length==0){
-            System.out.println("No server to select");
+        //Output choose list
+        if(profileList==null || profileList.isEmpty()){
+            System.out.println("Server profile database is empty");
         }else{
             int i=1;
-            for(File file:files){
-                File configFile=new File(file,SERVER_CONFIG_FILE_NAME);
-                if(!configFile.exists())
-                    continue;
-
-                try {
-                    String content=StreamUtils.readFileIntoString(configFile);
-                    String[] parts=content.split(",");
-                    String serverIp=parts[0];
-                    int port=Integer.parseInt(parts[1]);
-
-                    ServerPortInfo portInfo= JSONObject.parseObject(NormalHttpUtils.doGet("http://"+serverIp+":"+port+"/server/port_info"),
-                            ServerPortInfo.class);
-
-                    ServerProfile profile=new ServerProfile(file.getName(),serverIp,port,portInfo);
-                    profileList.add(profile);
-                    log.trace("Found server "+file.getName()+" : "+profile);
-
-                    System.out.println(String.format("%d) %s (http://%s:%d/)", i,file.getName(),serverIp,port));
-                    i++;
-                }catch (Exception e){
-                    log.error("Failed to load config for server named "+file.getName());
-                }
+            for(ServerProfile profile:profileList){
+                System.out.println(String.format("%d) %s (%s:%d)",
+                        i,profile.getServerName(),profile.getServerIp(),profile.getEntrancePort()));
+                i++;
             }
         }
 
-        while (true){
+        //Prompt user to choose
+        while (true) {
             System.out.print("Input the index to select server (0 to create a server profile) :");
-            int choice=scanner.nextInt();
-            if(choice<0 || choice>profileList.size()){
+            int choice = scanner.nextInt();
+
+            //Check if the choice is out of bound
+            if (choice < 0 || choice > profileList.size()) {
                 System.out.println("Illegal input, please check");
                 continue;
             }
 
-            if(choice!=0){
+            //Legal input, get the result
+            if (choice != 0) {
                 choice--;
                 return profileList.get(choice);
             }
 
+            //Add new server
             System.out.print("Please input the name of the server:");
-            String name=scanner.next();
-
-            if(new File(SERVERS_PATH+name).exists()){
-                System.out.println("Server named "+name+" already exists, please choose another name");
-                continue;
-            }
+            String name = scanner.next();
 
             System.out.print("Please input the ip of the server:");
-            String ip=scanner.next();
+            String ip = scanner.next();
 
             System.out.print("Please input the port of the server:");
-            int port=scanner.nextInt();
+            int port = scanner.nextInt();
 
             //Load port info from remote server
-            try {
-                ServerPortInfo portInfo= JSONObject.parseObject(NormalHttpUtils.doGet("http://"+ip+":"+port),
-                        ServerPortInfo.class);
+            ServerProfile serverProfile = new ServerProfile(UUIDUtils.getRandomUUID(), ip, name, port, null);
+            serverProfile = service.getServerPortAndFillServerProfile(serverProfile);
 
-                ServerProfile profile=new ServerProfile(name,ip,port,portInfo);
-
-                //It's a valid server, make it to file system
-                try {
-                    new File(SERVERS_PATH+name).mkdirs();
-                    File configFle=new File(SERVERS_PATH+name,SERVER_CONFIG_FILE_NAME);
-                    if(!configFle.exists())
-                        configFle.createNewFile();
-
-                    StreamUtils.writeFile(configFle,(ip+","+port).getBytes());
-                }catch (Exception e){
-                    log.error("Failed to create profile on file system for server "+name+"("+ip+","+port+")");
-                    System.out.println("Failed to save server config on file system, you may need to input it again next time");
-                }
-
-                return profile;
-            }catch (Exception e){
+            if (serverProfile == null) {
+                //Which means it's not an available server
                 System.out.println("Failed to load server port info from remote server, this server profile is dropped");
-                log.error("Failed to load config for server "+name+"("+ip+","+port+")");
                 continue;
             }
 
+            //Save profile into database and choose it
+            service.saveServerProfile(serverProfile);
+            return serverProfile;
         }
     }
 
+    /**
+     * Output a menu to let user choose token
+     * @return
+     */
     private static UserToken chooseToken(){
 
         while (true){
@@ -217,6 +189,10 @@ public class ClientMain {
         }
     }
 
+    /**
+     * Prompt user to register a new account
+     * @return
+     */
     private static UserToken register(){
         System.out.print("Please input your username:");
         String username=scanner.next();
@@ -227,7 +203,8 @@ public class ClientMain {
 
         boolean isSucceeded=false;
         try {
-            isSucceeded=AuthorizeService.register(username,passwordHash);
+            AuthorizeService authorizeService=SpringUtil.getBean(AuthorizeService.class);
+            isSucceeded=authorizeService.register(username,passwordHash);
         }catch (Exception e){
             log.error("Failed to register",e);
         }
@@ -241,6 +218,11 @@ public class ClientMain {
         return null;
     }
 
+    /**
+     * Prompt user to login for token
+     * If login succeeded, it will add the token into token storage
+     * @return
+     */
     private static UserToken loginForToken(){
         System.out.print("Please input your username:");
         String username=scanner.next();
@@ -249,39 +231,33 @@ public class ClientMain {
 
         String passwordHash= SHA256Utils.getHexEncodedSHA256(password);
 
+        AuthorizeService authorizeService=SpringUtil.getBean(AuthorizeService.class);
         String token= null;
         try {
-            token = AuthorizeService.login(username,passwordHash);
+            token = authorizeService.login(username,passwordHash);
         } catch (Exception e) {
             log.error("Failed to login",e);
         }
 
         if(token!=null){
-            try {
-                addTokenIntoStorage(token,username);
-                System.out.println("Login successfully");
-            }catch (Exception e){
-                log.error("Failed to save token into token storage",e);
-            }
-            return new UserToken(token,username);
+            UserToken userToken=new UserToken(token,username);
+            authorizeService.addUserToken(userToken);
+            return userToken;
         }else{
             System.out.println("Login failed");
             return null;
         }
     }
 
+    /**
+     * Output a list of token
+     * and let user choose which one to use
+     * @return
+     */
     private static UserToken chooseTokenFromStorage(){
-        LocalTokenStorageService storageService=LocalTokenStorageService.getInstance();
+        AuthorizeService service=SpringUtil.getBean(AuthorizeService.class);
 
-        List<UserToken> tokenList;
-        try {
-            tokenList=storageService.getAllToken();
-        } catch (Exception e) {
-            log.error("Failed to load all token",e);
-            System.out.println("Failed to load all token, please check log for detailed message");
-            return null;
-        }
-
+        List<UserToken> tokenList=service.getAllToken();
         if(tokenList==null || tokenList.isEmpty()){
             System.out.println("Token storage is empty");
             return null;
@@ -304,16 +280,11 @@ public class ClientMain {
         UserToken token=tokenList.get(choice);
 
         try {
-            if(!AuthorizeService.checkTokenValidity(token.getToken(),token.getUsername())){
+            //Check validity and remove invalid token
+            if(!service.checkTokenValidity(token.getToken(),token.getUsername())){
                 System.out.println("Token is invalid, please select another");
 
-                try {
-                    tokenList.remove(choice);
-                    storageService.saveTokenList(tokenList);
-                }catch (Exception e){
-                    log.error("Failed to remove invalid token from storage",e);
-                }
-
+                service.deleteToken(tokenList.remove(choice).getToken());
                 return null;
             }
         }catch (Exception e){
@@ -322,14 +293,6 @@ public class ClientMain {
         }
 
         return token;
-    }
-
-    private static void addTokenIntoStorage(String token,String username) throws Exception {
-        LocalTokenStorageService storageService=LocalTokenStorageService.getInstance();
-
-        List<UserToken> tokenList=storageService.getAllToken();
-        tokenList.add(new UserToken(token,username));
-        storageService.saveTokenList(tokenList);
     }
 
 }

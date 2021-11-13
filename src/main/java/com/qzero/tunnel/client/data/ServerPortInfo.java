@@ -1,4 +1,4 @@
-package com.qzero.tunnel.client.config;
+package com.qzero.tunnel.client.data;
 
 public class ServerPortInfo {
 
