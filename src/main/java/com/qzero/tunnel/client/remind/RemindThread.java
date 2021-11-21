@@ -1,9 +1,9 @@
 package com.qzero.tunnel.client.remind;
 
-import com.qzero.tunnel.client.crypto.CryptoModule;
-import com.qzero.tunnel.client.crypto.CryptoModuleFactory;
-import com.qzero.tunnel.client.crypto.modules.PlainModule;
-import com.qzero.tunnel.client.relay.RelaySession;
+import com.qzero.tunnel.crypto.CryptoModule;
+import com.qzero.tunnel.crypto.CryptoModuleFactory;
+import com.qzero.tunnel.crypto.modules.PlainModule;
+import com.qzero.tunnel.relay.RelaySession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

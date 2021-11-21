@@ -2,14 +2,16 @@ package com.qzero.tunnel.client.proxy;
 
 import com.qzero.tunnel.client.GlobalConfigStorage;
 import com.qzero.tunnel.client.SpringUtil;
-import com.qzero.tunnel.client.crypto.CryptoModule;
-import com.qzero.tunnel.client.crypto.CryptoModuleFactory;
-import com.qzero.tunnel.client.crypto.modules.PlainModule;
-import com.qzero.tunnel.client.relay.RelaySession;
+import com.qzero.tunnel.client.data.ServerProfile;
+import com.qzero.tunnel.client.data.UserToken;
 import com.qzero.tunnel.client.socks.NewClientConnectedCallback;
 import com.qzero.tunnel.client.socks.Socks5HandshakeInfo;
 import com.qzero.tunnel.client.socks.Socks5Server;
 import com.qzero.tunnel.client.socks.StreamUtils;
+import com.qzero.tunnel.crypto.CryptoModule;
+import com.qzero.tunnel.crypto.CryptoModuleFactory;
+import com.qzero.tunnel.crypto.DataWithLength;
+import com.qzero.tunnel.relay.RelaySession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,12 +29,14 @@ public class ProxyBridgeThread extends Thread {
 
     private Socks5Server socks5Server;
 
-    private NewClientConnectedCallback callback=(clientId,connection) -> {
+    private ServerProfile serverProfile;
+    private UserToken userToken;
 
+    private NewClientConnectedCallback callback=(clientId,connection) -> {
+        log.info("Received socks5 connection "+connection.getHandshakeInfo());
         Socket remote;
         try {
-            GlobalConfigStorage configStorage= SpringUtil.getBean(GlobalConfigStorage.class);
-            String ip= configStorage.getCurrentServerProfile().getServerIp();
+            String ip= serverProfile.getServerIp();
             remote=new Socket(ip,remotePort);
         }catch (Exception e){
             log.error("Failed to connect to tunnel server");
@@ -94,8 +98,7 @@ public class ProxyBridgeThread extends Thread {
             */
             ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
 
-            GlobalConfigStorage configStorage= SpringUtil.getBean(GlobalConfigStorage.class);
-            String token=configStorage.getUserToken().getToken();
+            String token=userToken.getToken();
 
             StreamUtils.writeIntWith4Bytes(byteArrayOutputStream,token.getBytes(StandardCharsets.UTF_8).length);
             byteArrayOutputStream.write(token.getBytes(StandardCharsets.UTF_8));
@@ -111,11 +114,13 @@ public class ProxyBridgeThread extends Thread {
             StreamUtils.writeIntWith4Bytes(byteArrayOutputStream,handshakeInfo.getPort());
 
             byte[] buf=byteArrayOutputStream.toByteArray();
-            buf=cryptoModule.encrypt(buf);
+            DataWithLength data=new DataWithLength(buf,buf.length);
+            data=cryptoModule.encrypt(data);
+            buf=data.getData();
 
             OutputStream os=remote.getOutputStream();
             StreamUtils.writeIntWith4Bytes(os,buf.length);
-            os.write(buf);
+            os.write(buf,0,data.getLength());
         }catch (Exception e){
             log.error("Failed to send proxy dst info",e);
 
@@ -132,13 +137,17 @@ public class ProxyBridgeThread extends Thread {
 
         relaySession.setDirectClient(connection.getLocalSocket());
         relaySession.setTunnelClient(remote);
-        relaySession.initializeCryptoModule(cryptoModule,new PlainModule());
+        relaySession.initializeCryptoModule(cryptoModule,null);
         relaySession.startRelay();
     };
 
     public ProxyBridgeThread(int localPort, int remotePort) {
         this.localPort = localPort;
         this.remotePort = remotePort;
+
+        GlobalConfigStorage configStorage= SpringUtil.getBean(GlobalConfigStorage.class);
+        serverProfile=configStorage.getCurrentServerProfile();
+        userToken=configStorage.getUserToken();
     }
 
     @Override
