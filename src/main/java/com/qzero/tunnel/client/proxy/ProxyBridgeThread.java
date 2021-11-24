@@ -116,6 +116,12 @@ public class ProxyBridgeThread extends Thread {
             byte[] buf=byteArrayOutputStream.toByteArray();
             DataWithLength data=new DataWithLength(buf,buf.length);
             data=cryptoModule.encrypt(data);
+
+            if(data==null){
+                //Normally it won't return null, it will throw exception
+                throw new Exception("Crypto error without throwing exception");
+            }
+
             buf=data.getData();
 
             OutputStream os=remote.getOutputStream();

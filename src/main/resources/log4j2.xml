@@ -40,7 +40,11 @@
     </Appenders>
 
     <Loggers>
-        <Root level="TRACE" additivity="false">
+        <Root level="ERROR" additivity="false">
+            <AppenderRef ref="FileError" />
+        </Root>
+
+        <logger name="com.qzero" level="TRACE" additivity="false">
             <AppenderRef ref="FileInfo">
                 <!-- Without error and fatal -->
                 <Filters>
@@ -57,7 +61,7 @@
                     <ThresholdFilter level="FATAL" onMatch="ACCEPT" onMismatch="DENY"/>
                 </Filters>
             </AppenderRef>
-        </Root>
+        </logger>
 
     </Loggers>
 </Configuration>
