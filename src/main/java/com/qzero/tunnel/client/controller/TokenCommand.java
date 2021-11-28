@@ -1,5 +1,6 @@
 package com.qzero.tunnel.client.controller;
 
+import com.qzero.tunnel.client.GlobalConfigStorage;
 import com.qzero.tunnel.client.command.CommandMethod;
 import com.qzero.tunnel.client.data.UserToken;
 import com.qzero.tunnel.client.service.AuthorizeService;
@@ -18,6 +19,9 @@ public class TokenCommand {
     @Autowired
     private AuthorizeService authorizeService;
 
+    @Autowired
+    private GlobalConfigStorage configStorage;
+
     /**
      * get_all_token
      * @param parts
@@ -28,7 +32,7 @@ public class TokenCommand {
     private String getAllToken(String[] parts,String commandLine){
         List<UserToken> tokenList;
         try {
-            tokenList=authorizeService.getAllToken();
+            tokenList=authorizeService.getAllTokenByServerIp(configStorage.getCurrentServerProfile().getServerIp());
         }catch (Exception e){
             log.error("Failed to get all token",e);
             return "Failed to get all token";
@@ -68,7 +72,8 @@ public class TokenCommand {
      */
     @CommandMethod(commandName = "delete_all_token")
     private String deleteAllToken(String[] parts,String commandLine){
-        authorizeService.deleteAllToken();
+
+        authorizeService.deleteAllTokenByServerIp(configStorage.getCurrentServerProfile().getServerIp());
         return "Deleted all token";
     }
 

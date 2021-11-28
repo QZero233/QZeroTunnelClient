@@ -235,7 +235,7 @@ public class ClientMain {
         }
 
         if(token!=null){
-            UserToken userToken=new UserToken(token,username);
+            UserToken userToken=new UserToken(token,username,serverProfile.getServerIp());
             authorizeService.addUserToken(userToken);
             return userToken;
         }else{
@@ -252,7 +252,7 @@ public class ClientMain {
     private static UserToken chooseTokenFromStorage(){
         AuthorizeService service=SpringUtil.getBean(AuthorizeService.class);
 
-        List<UserToken> tokenList=service.getAllToken();
+        List<UserToken> tokenList=service.getAllTokenByServerIp(serverProfile.getServerIp());
         if(tokenList==null || tokenList.isEmpty()){
             System.out.println("Token storage is empty");
             return null;

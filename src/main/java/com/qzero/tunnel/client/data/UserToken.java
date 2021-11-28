@@ -9,13 +9,15 @@ public class UserToken {
     @Id
     private String token;
     private String username;
+    private String serverIp;
 
     public UserToken() {
     }
 
-    public UserToken(String token, String username) {
+    public UserToken(String token, String username, String serverIp) {
         this.token = token;
         this.username = username;
+        this.serverIp = serverIp;
     }
 
     public String getToken() {
@@ -34,11 +36,20 @@ public class UserToken {
         this.username = username;
     }
 
+    public String getServerIp() {
+        return serverIp;
+    }
+
+    public void setServerIp(String serverIp) {
+        this.serverIp = serverIp;
+    }
+
     @Override
     public String toString() {
         return "UserToken{" +
                 "token='" + token + '\'' +
                 ", username='" + username + '\'' +
+                ", serverIp='" + serverIp + '\'' +
                 '}';
     }
 }

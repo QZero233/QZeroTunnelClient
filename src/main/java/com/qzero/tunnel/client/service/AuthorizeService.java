@@ -58,8 +58,8 @@ public class AuthorizeService {
     }
 
 
-    public List<UserToken> getAllToken(){
-        return tokenRepository.findAll();
+    public List<UserToken> getAllTokenByServerIp(String ip){
+        return tokenRepository.findAllByServerIp(ip);
     }
 
     public void addUserToken(UserToken userToken){
@@ -70,8 +70,8 @@ public class AuthorizeService {
         tokenRepository.deleteById(token);
     }
 
-    public void deleteAllToken(){
-        tokenRepository.deleteAll();
+    public void deleteAllTokenByServerIp(String ip){
+        tokenRepository.deleteAllByServerIp(ip);
     }
 
 }
