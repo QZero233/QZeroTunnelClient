@@ -53,9 +53,9 @@ public class ClientMain {
         //Connect to remind server
         try {
             ServerPortInfo portInfo= serverProfile.getPortInfo();;
-            RemindThread remindThread=new RemindThread(serverProfile.getServerIp(),portInfo.getRemindServerPort()
+            RemindThread.initializeInstance(serverProfile.getServerIp(),portInfo.getRemindServerPort()
                     ,portInfo.getRelaySeverPort(),token.getToken());
-            remindThread.start();
+            RemindThread.getInstance().start();
         }catch (Exception e){
             System.err.println("Failed to connect to remind server");
             log.error("Failed to connect to remind server",e);

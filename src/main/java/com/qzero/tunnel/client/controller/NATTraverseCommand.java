@@ -3,6 +3,7 @@ package com.qzero.tunnel.client.controller;
 import com.qzero.tunnel.client.command.CommandMethod;
 import com.qzero.tunnel.client.data.NATTraverseMapping;
 import com.qzero.tunnel.client.exception.IllegalPortException;
+import com.qzero.tunnel.client.remind.RemindThread;
 import com.qzero.tunnel.client.service.NATTraverseMappingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,6 +109,21 @@ public class NATTraverseCommand {
 
         NATTraverseMapping natTraverseMapping=NATTraverseMappingService.getNATTraverseMapping(tunnelPort);
         return natTraverseMapping.toString();
+    }
+
+
+    /**
+     * reconnect_to_remind_server
+     * @param parts
+     * @param commandLine
+     * @return
+     */
+    @CommandMethod(commandName = "reconnect_to_remind_server")
+    private String reconnect(String[] parts,String commandLine) throws Exception{
+        RemindThread.renewInstance();
+        RemindThread.getInstance().start();
+
+        return "Reconnecting to remind server";
     }
 
 }

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ConnectException;
@@ -21,13 +22,30 @@ public class RemindThread extends Thread {
 
     private BufferedReader br;
 
-    private String ip;
-    private int relayServerPort;
+    private static String ip;
+    private static int port;
+    private static int relayServerPort;
 
-    private String token;
+    private static String token;
 
-    public RemindThread(String ip, int port, int relayServerPort,String token) throws Exception{
+    private static RemindThread instance;
+
+    public static void initializeInstance(String ip, int port, int relayServerPort,String token) throws Exception{
+        instance=new RemindThread(ip,port,relayServerPort,token);
+    }
+
+    public static void renewInstance() throws Exception{
+        instance.closeConnection();
+        instance=new RemindThread(ip,port,relayServerPort,token);
+    }
+
+    public static RemindThread getInstance() {
+        return instance;
+    }
+
+    private RemindThread(String ip, int port, int relayServerPort, String token) throws Exception{
         this.ip=ip;
+        this.port=port;
         this.relayServerPort=relayServerPort;
         this.token=token;
         socket=new Socket(ip,port);
@@ -71,6 +89,9 @@ public class RemindThread extends Thread {
                     session.startRelay();
                 }catch (Exception e1){
                     log.error("Failed to start relay session with line "+line,e1);
+
+                    System.err.println("Failed to start NAT traverse relay session, please check local server or remote server\n" +
+                            "reason:"+e1.getMessage());
                 }
 
             }
@@ -79,6 +100,7 @@ public class RemindThread extends Thread {
                 log.info("Closed connection with serverside's remind server");
             }else{
                 log.error("Failed to read command line from serverside",e);
+                System.err.println("Lost connection with NAT Traverse remind server, please use command reconnect_to_remind_server to reconnect manually");
             }
         }
     }
@@ -109,11 +131,21 @@ public class RemindThread extends Thread {
         }catch (Exception e){
             log.error("Failed to do handshake, session closed",e);
             session.closeSession();
+            throw e;
         }
 
         session.initializeCryptoModule(module,new PlainModule());
 
         return session;
+    }
+
+    public void closeConnection(){
+        interrupt();
+        try {
+            socket.close();
+        } catch (IOException e) {
+            log.error("Failed to close connection with remind server",e);
+        }
     }
 
 }
