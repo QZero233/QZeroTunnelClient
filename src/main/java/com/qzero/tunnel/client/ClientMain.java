@@ -30,7 +30,7 @@ public class ClientMain {
     public static void main(String[] args) throws Exception{
         SpringApplication.run(ClientMain.class);
 
-        new TestServer().start();
+        //new TestServer().start();
 
         GlobalConfigStorage configStorage=SpringUtil.getBean(GlobalConfigStorage.class);
 

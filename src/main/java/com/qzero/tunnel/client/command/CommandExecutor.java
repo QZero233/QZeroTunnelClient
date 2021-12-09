@@ -5,6 +5,7 @@ import com.qzero.tunnel.client.exception.ActionFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@DependsOn("spring_util")
 public class CommandExecutor {
 
     private Logger log= LoggerFactory.getLogger(getClass());

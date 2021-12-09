@@ -93,28 +93,30 @@
     </properties>
 
     <build>
+
         <plugins>
+
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-
-
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <mainClass>com.qzero.tunnel.client.ClientMain</mainClass>
-                        </manifest>
-                    </archive>
-
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-
+                    <mainClass>com.qzero.tunnel.client.ClientMain</mainClass>
+                    <executable>true</executable>
+                    <finalName>${project.artifactId}</finalName>
                 </configuration>
+
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                            <!--可以把依赖的包都打包到生成的Jar包中-->
+                        </goals>
+                    </execution>
+                </executions>
+
             </plugin>
         </plugins>
+
     </build>
     
 </project>

@@ -4,8 +4,6 @@ import com.qzero.tunnel.client.command.CommandMethod;
 import com.qzero.tunnel.client.data.TunnelConfig;
 import com.qzero.tunnel.client.exception.IllegalPortException;
 import com.qzero.tunnel.client.service.TunnelService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -13,8 +11,6 @@ import java.util.List;
 
 @Controller
 public class TunnelCommand {
-
-    private Logger log= LoggerFactory.getLogger(getClass());
 
     @Autowired
     private TunnelService tunnelService;
@@ -25,6 +21,8 @@ public class TunnelCommand {
                 return TunnelConfig.TYPE_NAT_TRAVERSE;
             case "proxy":
                 return TunnelConfig.TYPE_PROXY;
+            case "virtualnetwork":
+                return TunnelConfig.TYPE_VIRTUAL_NETWORK;
             default:
                 throw new IllegalArgumentException("No tunnel type "+tunnelTypeInString);
         }
