@@ -42,12 +42,12 @@ public class NATTraverseCommand {
     }
 
     /**
-     * update_nat_traverse_mapping tunnelPort localIp localPort isHot
+     * update_nat_traverse_mapping tunnelPort localIp localPort
      * @param parts
      * @param commandLine
      * @return
      */
-    @CommandMethod(commandName = "update_nat_traverse_mapping",parameterCount = 4)
+    @CommandMethod(commandName = "update_nat_traverse_mapping",parameterCount = 3)
     private String updateNATTraverseMapping(String[] parts,String commandLine) throws Exception {
         int tunnelPort;
         try {
@@ -64,10 +64,8 @@ public class NATTraverseCommand {
         }
 
         NATTraverseMapping natTraverseMapping=new NATTraverseMapping(tunnelPort,parts[2],localPort);
-        boolean isHot=Boolean.getBoolean(parts[4]);
 
-
-        NATTraverseMappingService.updateNATTraverseMapping(natTraverseMapping,isHot);
+        NATTraverseMappingService.updateNATTraverseMapping(natTraverseMapping);
         return String.format("NATTraverseMapping on %d has been updated", tunnelPort);
     }
 

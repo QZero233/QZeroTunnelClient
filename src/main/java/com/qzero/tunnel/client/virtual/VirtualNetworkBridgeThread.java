@@ -89,15 +89,18 @@ public class VirtualNetworkBridgeThread extends Thread {
         try {
             ByteArrayOutputStream byteArrayOutputStream=new ByteArrayOutputStream();
             /**
-             * 4 bytes length of username
-             * n bytes username
+             * 4 bytes length of dstIdentity
+             * n bytes dstIdentity
              * 4 bytes port
              */
-            //FIXME at this time,we use domain as username
             Socks5HandshakeInfo handshakeInfo=connection.getHandshakeInfo();
 
-            StreamUtils.writeIntWith4Bytes(byteArrayOutputStream,handshakeInfo.getDomainName().getBytes(StandardCharsets.UTF_8).length);
-            byteArrayOutputStream.write(handshakeInfo.getDomainName().getBytes(StandardCharsets.UTF_8));
+            String dstIdentity=handshakeInfo.getDomainName();
+            if(dstIdentity==null)
+                dstIdentity=handshakeInfo.getIpv4Address();
+
+            StreamUtils.writeIntWith4Bytes(byteArrayOutputStream,dstIdentity.getBytes(StandardCharsets.UTF_8).length);
+            byteArrayOutputStream.write(dstIdentity.getBytes(StandardCharsets.UTF_8));
             StreamUtils.writeIntWith4Bytes(byteArrayOutputStream,handshakeInfo.getPort());
 
             DataWithLength data=cryptoModule.encrypt(new DataWithLength(byteArrayOutputStream.toByteArray(),byteArrayOutputStream.size()));

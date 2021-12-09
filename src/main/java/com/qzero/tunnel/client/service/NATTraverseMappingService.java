@@ -32,7 +32,7 @@ public class NATTraverseMappingService {
             throw new Exception(actionResult.getMessage());
     }
 
-    public static void updateNATTraverseMapping(NATTraverseMapping natTraverseMapping,boolean hot) throws Exception{
+    public static void updateNATTraverseMapping(NATTraverseMapping natTraverseMapping) throws Exception{
         HttpUtils httpUtils=HttpUtils.getInstance();
 
         HttpRequestParam param=new HttpRequestParam();
@@ -40,9 +40,6 @@ public class NATTraverseMappingService {
         param.add("local_port",natTraverseMapping.getLocalPort()+"");
 
         String path="/nat_traverse_mapping/"+natTraverseMapping.getTunnelPort();
-        if(hot){
-            path+="/hot";
-        }
 
         String result=httpUtils.doPut(path,param);
         ActionResult actionResult= JSONObject.parseObject(result,ActionResult.class);

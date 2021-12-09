@@ -25,15 +25,13 @@ public class TunnelService {
     }
 
     @UseExceptionAdvice
-    public String updateCryptoModuleName(TunnelConfig tunnelConfig,boolean hot) throws Exception {
+    public String updateCryptoModuleName(TunnelConfig tunnelConfig) throws Exception {
         HttpUtils httpUtils= HttpUtils.getInstance();
 
         HttpRequestParam param=new HttpRequestParam();
         param.add("crypto_module_name",tunnelConfig.getCryptoModuleName());
 
         String path="/tunnel/"+tunnelConfig.getTunnelPort()+"/crypto_module_name";
-        if(hot)
-            path+="/hot";
 
         return httpUtils.doPut(path,param);
     }

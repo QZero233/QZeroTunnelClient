@@ -52,12 +52,12 @@ public class TunnelCommand {
     }
 
     /**
-     * update_tunnel_crypto tunnelPort cryptoModuleName isHot
+     * update_tunnel_crypto tunnelPort cryptoModuleName
      * @param parts
      * @param commandLine
      * @return
      */
-    @CommandMethod(commandName = "update_tunnel_crypto",parameterCount = 3)
+    @CommandMethod(commandName = "update_tunnel_crypto",parameterCount = 2)
     private String updateTunnelCrypto(String[] parts,String commandLine) throws Exception {
         int tunnelPort;
         try {
@@ -68,10 +68,8 @@ public class TunnelCommand {
 
 
         TunnelConfig tunnelConfig=new TunnelConfig(tunnelPort,parts[2],0);
-        boolean isHot=Boolean.getBoolean(parts[3]);
 
-
-        tunnelService.updateCryptoModuleName(tunnelConfig,isHot);
+        tunnelService.updateCryptoModuleName(tunnelConfig);
         return String.format("Tunnel config on %d has been updated", tunnelPort);
     }
 
