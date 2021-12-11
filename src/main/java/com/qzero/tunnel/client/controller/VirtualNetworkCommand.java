@@ -2,19 +2,18 @@ package com.qzero.tunnel.client.controller;
 
 import com.qzero.tunnel.client.command.CommandMethod;
 import com.qzero.tunnel.client.exception.IllegalPortException;
-import com.qzero.tunnel.client.virtual.VirtualNetworkBridgeThread;
+import com.qzero.tunnel.client.service.VirtualNetworkBridgeService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Controller
 public class VirtualNetworkCommand {
 
-    private List<VirtualNetworkBridgeThread> threadList=new ArrayList<>();
+    @Autowired
+    private VirtualNetworkBridgeService service;
 
     /**
-     * start_proxy_bridge localPort tunnelPort
+     * start_virtual_network_bridge localPort tunnelPort
      * @param parts
      * @param commandLine
      */
@@ -34,11 +33,27 @@ public class VirtualNetworkCommand {
             throw new IllegalPortException(parts[2]);
         }
 
-        VirtualNetworkBridgeThread thread=new VirtualNetworkBridgeThread(localPort,tunnelPort);
-        thread.start();
-        threadList.add(thread);//FIXME for test, remove it
+        service.openVirtualNetworkBridge(localPort,tunnelPort);
 
         return "Started successfully";
+    }
+
+    /**
+     * stop_virtual_network_bridge localPort
+     * @param parts
+     * @param commandLine
+     */
+    @CommandMethod(commandName = "stop_virtual_network_bridge",parameterCount = 1)
+    private String stopVirtualNetworkBridge(String[] parts,String commandLine) throws Exception {
+        int localPort;
+        try {
+            localPort=Integer.parseInt(parts[1]);
+        }catch (NumberFormatException e){
+            throw new IllegalPortException(parts[1]);
+        }
+
+        service.closeVirtualNetworkBridge(localPort);
+        return "Stopped successfully";
     }
 
 }
