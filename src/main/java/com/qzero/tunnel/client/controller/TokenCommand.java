@@ -1,6 +1,6 @@
 package com.qzero.tunnel.client.controller;
 
-import com.qzero.tunnel.client.GlobalConfigStorage;
+import com.qzero.tunnel.client.config.GlobalConfigStorage;
 import com.qzero.tunnel.client.command.CommandMethod;
 import com.qzero.tunnel.client.data.UserToken;
 import com.qzero.tunnel.client.service.AuthorizeService;

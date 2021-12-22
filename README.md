@@ -109,6 +109,8 @@ mvn package
 java -jar QZeroTunnelClient.jar
 ```
 
+By starting with `--prefer.checkServerAlive=false`, the program will not check if the server in database is online, which will save some launch time
+
 #### Create or select server
 
 (Notice: offline server won't be listed, it may take some time to check if the server is online)

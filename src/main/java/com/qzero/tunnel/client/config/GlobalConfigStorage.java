@@ -1,11 +1,15 @@
-package com.qzero.tunnel.client;
+package com.qzero.tunnel.client.config;
 
 import com.qzero.tunnel.client.data.ServerProfile;
 import com.qzero.tunnel.client.data.UserToken;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class GlobalConfigStorage {
+
+    @Autowired
+    private PreferenceConfig preferenceConfig;
 
     private ServerProfile currentServerProfile;
 
@@ -25,5 +29,9 @@ public class GlobalConfigStorage {
 
     public void setUserToken(UserToken userToken) {
         this.userToken = userToken;
+    }
+
+    public PreferenceConfig getPreferenceConfig() {
+        return preferenceConfig;
     }
 }

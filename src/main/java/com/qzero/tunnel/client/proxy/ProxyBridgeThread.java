@@ -1,6 +1,6 @@
 package com.qzero.tunnel.client.proxy;
 
-import com.qzero.tunnel.client.GlobalConfigStorage;
+import com.qzero.tunnel.client.config.GlobalConfigStorage;
 import com.qzero.tunnel.client.SpringUtil;
 import com.qzero.tunnel.client.data.ServerProfile;
 import com.qzero.tunnel.client.data.UserToken;

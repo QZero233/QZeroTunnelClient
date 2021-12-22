@@ -1,6 +1,7 @@
 package com.qzero.tunnel.client;
 
 import com.qzero.tunnel.client.command.CommandExecutor;
+import com.qzero.tunnel.client.config.GlobalConfigStorage;
 import com.qzero.tunnel.client.data.ServerPortInfo;
 import com.qzero.tunnel.client.data.ServerProfile;
 import com.qzero.tunnel.client.data.UserToken;
@@ -13,6 +14,7 @@ import com.qzero.tunnel.client.utils.UUIDUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.List;
@@ -35,7 +37,7 @@ public class ClientMain {
         GlobalConfigStorage configStorage=SpringUtil.getBean(GlobalConfigStorage.class);
 
         //Choose server profile
-        serverProfile=chooseServer();
+        serverProfile=chooseServer(configStorage.getPreferenceConfig().isCheckServerAlive());
         configStorage.setCurrentServerProfile(serverProfile);
 
         //Set base url
@@ -92,9 +94,14 @@ public class ClientMain {
      * Output a menu to let user choose server
      * @return
      */
-    private static ServerProfile chooseServer(){
+    private static ServerProfile chooseServer(boolean checkServerAlive){
         ServerProfileService service=SpringUtil.getBean(ServerProfileService.class);
-        List<ServerProfile> profileList=service.getAllAvailableServerProfile();
+        List<ServerProfile> profileList;
+
+        if(checkServerAlive)
+            profileList=service.getAllAvailableServerProfile();
+        else
+            profileList=service.getAllServerProfile();
 
         //Output choose list
         if(profileList==null || profileList.isEmpty()){
@@ -122,7 +129,20 @@ public class ClientMain {
             //Legal input, get the result
             if (choice != 0) {
                 choice--;
-                return profileList.get(choice);
+                ServerProfile chosenProfile=profileList.get(choice);
+
+                //Load port info from remote server
+                if(chosenProfile.getPortInfo()==null){
+                    chosenProfile=service.getServerPortAndFillServerProfile(chosenProfile);
+
+                    //Which means the remote server is down
+                    if(chosenProfile==null){
+                        System.out.println("Can not connect to remote server, please select another");
+                        continue;
+                    }
+                }
+
+                return chosenProfile;
             }
 
             //Add new server
@@ -135,19 +155,12 @@ public class ClientMain {
             System.out.print("Please input the port of the server:");
             int port = scanner.nextInt();
 
-            //Load port info from remote server
             ServerProfile serverProfile = new ServerProfile(UUIDUtils.getRandomUUID(), ip, name, port, null);
-            serverProfile = service.getServerPortAndFillServerProfile(serverProfile);
-
-            if (serverProfile == null) {
-                //Which means it's not an available server
-                System.out.println("Failed to load server port info from remote server, this server profile is dropped");
-                continue;
-            }
-
-            //Save profile into database and choose it
+            //Save profile into database but won't choose it
             service.saveServerProfile(serverProfile);
-            return serverProfile;
+            profileList.add(serverProfile);
+            System.out.println("Add successfully");
+            continue;
         }
     }
 
