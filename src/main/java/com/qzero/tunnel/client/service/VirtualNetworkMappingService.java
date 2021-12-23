@@ -11,11 +11,7 @@ public class VirtualNetworkMappingService {
     public static void newVirtualNetworkMapping(VirtualNetworkMapping virtualNetworkMapping) throws Exception {
         HttpUtils httpUtils=HttpUtils.getInstance();
 
-        HttpRequestParam param=new HttpRequestParam();
-        param.add("dst_identity",virtualNetworkMapping.getDstIdentity());
-        param.add("dst_username",virtualNetworkMapping.getDstUserName());
-
-        String result=httpUtils.doPost("/virtual_network_mapping/",param);
+        String result=httpUtils.doPost("/virtual_network_mapping/",virtualNetworkMapping);
         ActionResult actionResult= JSONObject.parseObject(result,ActionResult.class);
 
         if(!actionResult.isSucceeded())
@@ -35,12 +31,9 @@ public class VirtualNetworkMappingService {
     public static void updateVirtualNetworkMapping(VirtualNetworkMapping virtualNetworkMapping) throws Exception{
         HttpUtils httpUtils=HttpUtils.getInstance();
 
-        HttpRequestParam param=new HttpRequestParam();
-        param.add("dst_username",virtualNetworkMapping.getDstUserName());
-
         String path="/virtual_network_mapping/"+virtualNetworkMapping.getDstIdentity();
 
-        String result=httpUtils.doPut(path,param);
+        String result=httpUtils.doPut(path,virtualNetworkMapping);
         ActionResult actionResult= JSONObject.parseObject(result,ActionResult.class);
 
         if(!actionResult.isSucceeded())

@@ -1,6 +1,7 @@
 package com.qzero.tunnel.client.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.qzero.tunnel.client.data.TunnelUser;
 import com.qzero.tunnel.client.data.UserToken;
 import com.qzero.tunnel.client.data.repository.UserTokenRepository;
 import com.qzero.tunnel.client.service.aspect.UseExceptionAdvice;
@@ -19,18 +20,13 @@ public class AuthorizeService {
 
     /**
      * Login using username and passwordHash
-     * @param username username
-     * @param passwordHash passwordHash
+     * @param tunnelUser The user info
      * @return The token id of the user is action succeeded, otherwise null
      * @throws Exception Thrown if send http request failed
      */
-    public String login(String username,String passwordHash) throws Exception {
-        HttpRequestParam param=new HttpRequestParam();
-        param.add("username",username);
-        param.add("password_hash",passwordHash);
-
+    public String login(TunnelUser tunnelUser) throws Exception {
         HttpUtils httpUtils= HttpUtils.getInstance();
-        String result=httpUtils.doPost("/auth/login",param);
+        String result=httpUtils.doPost("/auth/login",tunnelUser);
 
         ActionResult actionResult=JSONObject.parseObject(result,ActionResult.class);
         if(actionResult.isSucceeded())
@@ -40,13 +36,9 @@ public class AuthorizeService {
     }
 
     @UseExceptionAdvice
-    public String register(String username,String passwordHash) throws Exception {
-        HttpRequestParam param=new HttpRequestParam();
-        param.add("username",username);
-        param.add("password_hash",passwordHash);
-
+    public String register(TunnelUser tunnelUser) throws Exception {
         HttpUtils httpUtils= HttpUtils.getInstance();
-        return httpUtils.doPost("/auth/register",param);
+        return httpUtils.doPost("/auth/register",tunnelUser);
     }
 
     public boolean checkTokenValidity(String token,String username) throws Exception {

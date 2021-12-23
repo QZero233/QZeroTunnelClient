@@ -4,6 +4,7 @@ import com.qzero.tunnel.client.command.CommandExecutor;
 import com.qzero.tunnel.client.config.GlobalConfigStorage;
 import com.qzero.tunnel.client.data.ServerPortInfo;
 import com.qzero.tunnel.client.data.ServerProfile;
+import com.qzero.tunnel.client.data.TunnelUser;
 import com.qzero.tunnel.client.data.UserToken;
 import com.qzero.tunnel.client.remind.RemindThread;
 import com.qzero.tunnel.client.service.AuthorizeService;
@@ -216,7 +217,7 @@ public class ClientMain {
 
         try {
             AuthorizeService authorizeService=SpringUtil.getBean(AuthorizeService.class);
-            authorizeService.register(username,passwordHash);
+            authorizeService.register(new TunnelUser(username,passwordHash));
             System.out.println("Register successfully, please login");
         }catch (Exception e){
             log.error("Failed to register",e);
@@ -242,7 +243,7 @@ public class ClientMain {
         AuthorizeService authorizeService=SpringUtil.getBean(AuthorizeService.class);
         String token= null;
         try {
-            token = authorizeService.login(username,passwordHash);
+            token = authorizeService.login(new TunnelUser(username,passwordHash));
         } catch (Exception e) {
             log.error("Failed to login",e);
         }

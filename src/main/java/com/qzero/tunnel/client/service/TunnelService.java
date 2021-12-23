@@ -16,12 +16,7 @@ public class TunnelService {
     @UseExceptionAdvice
     public String newTunnel(TunnelConfig tunnelConfig) throws Exception {
         HttpUtils httpUtils= HttpUtils.getInstance();
-
-        HttpRequestParam param=new HttpRequestParam();
-        param.add("crypto_module_name",tunnelConfig.getCryptoModuleName());
-        param.add("tunnel_type",tunnelConfig.getTunnelType()+"");
-
-        return httpUtils.doPost("/tunnel/"+tunnelConfig.getTunnelPort(),param);
+        return httpUtils.doPost("/tunnel/"+tunnelConfig.getTunnelPort(),tunnelConfig);
     }
 
     @UseExceptionAdvice

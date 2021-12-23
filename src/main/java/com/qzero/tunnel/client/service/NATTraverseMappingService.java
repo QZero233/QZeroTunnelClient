@@ -11,11 +11,7 @@ public class NATTraverseMappingService {
     public static void newNATTraverseMapping(NATTraverseMapping natTraverseMapping) throws Exception {
         HttpUtils httpUtils=HttpUtils.getInstance();
 
-        HttpRequestParam param=new HttpRequestParam();
-        param.add("local_ip",natTraverseMapping.getLocalIp());
-        param.add("local_port",natTraverseMapping.getLocalPort()+"");
-
-        String result=httpUtils.doPost("/nat_traverse_mapping/"+natTraverseMapping.getTunnelPort(),param);
+        String result=httpUtils.doPost("/nat_traverse_mapping/"+natTraverseMapping.getTunnelPort(),natTraverseMapping);
         ActionResult actionResult= JSONObject.parseObject(result,ActionResult.class);
 
         if(!actionResult.isSucceeded())
@@ -35,13 +31,9 @@ public class NATTraverseMappingService {
     public static void updateNATTraverseMapping(NATTraverseMapping natTraverseMapping) throws Exception{
         HttpUtils httpUtils=HttpUtils.getInstance();
 
-        HttpRequestParam param=new HttpRequestParam();
-        param.add("local_ip",natTraverseMapping.getLocalIp());
-        param.add("local_port",natTraverseMapping.getLocalPort()+"");
-
         String path="/nat_traverse_mapping/"+natTraverseMapping.getTunnelPort();
 
-        String result=httpUtils.doPut(path,param);
+        String result=httpUtils.doPut(path,natTraverseMapping);
         ActionResult actionResult= JSONObject.parseObject(result,ActionResult.class);
 
         if(!actionResult.isSucceeded())
