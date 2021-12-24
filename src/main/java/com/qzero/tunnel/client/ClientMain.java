@@ -33,6 +33,9 @@ public class ClientMain {
     public static void main(String[] args) throws Exception{
         SpringApplication.run(ClientMain.class);
 
+        //Initialize http client
+        HttpUtils.getInstance().initializeHttpClient();
+
         //new TestServer().start();
 
         GlobalConfigStorage configStorage=SpringUtil.getBean(GlobalConfigStorage.class);
@@ -42,7 +45,7 @@ public class ClientMain {
         configStorage.setCurrentServerProfile(serverProfile);
 
         //Set base url
-        String baseUrl="http://"+serverProfile.getServerIp()+":"+serverProfile.getEntrancePort();
+        String baseUrl="https://"+serverProfile.getServerIp()+":"+serverProfile.getEntrancePort();
         HttpUtils.getInstance().setBaseUrl(baseUrl);
 
         //Choose user token
@@ -161,6 +164,15 @@ public class ClientMain {
             service.saveServerProfile(serverProfile);
             profileList.add(serverProfile);
             System.out.println("Add successfully");
+
+            //Output selection menu again
+            int i=1;
+            for(ServerProfile profile:profileList){
+                System.out.println(String.format("%d) %s (%s:%d)",
+                        i,profile.getServerName(),profile.getServerIp(),profile.getEntrancePort()));
+                i++;
+            }
+
             continue;
         }
     }

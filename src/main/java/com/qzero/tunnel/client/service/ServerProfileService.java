@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.qzero.tunnel.client.data.ServerPortInfo;
 import com.qzero.tunnel.client.data.ServerProfile;
 import com.qzero.tunnel.client.data.repository.ServerProfileRepository;
-import com.qzero.tunnel.client.utils.NormalHttpUtils;
+import com.qzero.tunnel.client.utils.HttpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +53,7 @@ public class ServerProfileService {
      */
     public ServerProfile getServerPortAndFillServerProfile(ServerProfile profile){
         try {
-            ServerPortInfo portInfo= JSONObject.parseObject(NormalHttpUtils.doGet("http://"+
+            ServerPortInfo portInfo= JSONObject.parseObject(HttpUtils.getInstance().doNormalGet("https://"+
                             profile.getServerIp()+":"+profile.getEntrancePort()+"/server/port_info"),
                     ServerPortInfo.class);
 
