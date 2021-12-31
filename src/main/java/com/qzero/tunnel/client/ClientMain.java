@@ -31,7 +31,7 @@ public class ClientMain {
     private static ServerProfile serverProfile;
 
     public static void main(String[] args) throws Exception{
-        SpringApplication.run(ClientMain.class);
+        SpringApplication.run(ClientMain.class,args);
 
         //Initialize http client
         HttpUtils.getInstance().initializeHttpClient();

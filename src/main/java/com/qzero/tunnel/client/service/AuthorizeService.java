@@ -5,7 +5,6 @@ import com.qzero.tunnel.client.data.TunnelUser;
 import com.qzero.tunnel.client.data.UserToken;
 import com.qzero.tunnel.client.data.repository.UserTokenRepository;
 import com.qzero.tunnel.client.service.aspect.UseExceptionAdvice;
-import com.qzero.tunnel.client.utils.HttpRequestParam;
 import com.qzero.tunnel.client.utils.HttpUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
